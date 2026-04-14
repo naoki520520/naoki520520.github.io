@@ -78,10 +78,10 @@ header h1 {
 font-size: 26px;
 font-weight: 800;
 letter-spacing: 1px;
-background: linear-gradient(135deg, #ff4fd8 0%, #9945ff 40%, #00e5ff 100%);
--webkit-background-clip: text;
-background-clip: text;
-color: transparent;
+color: #fff;
+text-shadow:
+0 0 20px rgba(255, 79, 216, 0.6),
+0 0 40px rgba(153, 69, 255, 0.4);
 margin-bottom: 6px;
 }
 header .sub {
@@ -120,12 +120,12 @@ position: relative;
 .dash-total {
 font-size: 34px;
 font-weight: 800;
-background: linear-gradient(135deg, #ffd26f, #ff4fd8, #9945ff);
--webkit-background-clip: text;
-background-clip: text;
-color: transparent;
+color: #fff;
+text-shadow:
+0 0 18px rgba(255, 210, 111, 0.7),
+0 0 4px rgba(255, 79, 216, 0.5);
 position: relative;
-margin-bottom: 4px;
+margin-bottom: 10px;
 }
 .dash-sub {
 display: flex;
@@ -135,7 +135,33 @@ font-size: 13px;
 color: var(–text-muted);
 position: relative;
 }
-.dash-sub span b { color: var(–accent-cyan); font-weight: 600; }
+.dash-sub span b { color: var(–accent-cyan); font-weight: 700; }
+
+/* 年股息區塊 */
+.dash-year {
+margin-top: 14px;
+padding-top: 14px;
+border-top: 1px solid rgba(255,255,255,0.15);
+display: flex;
+justify-content: space-between;
+align-items: center;
+position: relative;
+flex-wrap: wrap;
+gap: 8px;
+}
+.dash-year .year-label {
+font-size: 12px;
+color: var(–text-muted);
+letter-spacing: 1px;
+}
+.dash-year .year-value {
+font-size: 24px;
+font-weight: 800;
+color: #fff;
+text-shadow:
+0 0 18px rgba(0, 229, 255, 0.7),
+0 0 4px rgba(255, 210, 111, 0.6);
+}
 
 /* ETF 卡片 */
 .card {
@@ -158,9 +184,9 @@ height: 2px;
 background: var(–card-accent, linear-gradient(90deg, #ff4fd8, #9945ff, #00e5ff));
 opacity: 0.9;
 }
-.card[data-id=“0056”] { –card-accent: linear-gradient(90deg, #ff4fd8, #ffd26f); }
-.card[data-id=“00878”] { –card-accent: linear-gradient(90deg, #00e5ff, #9945ff); }
-.card[data-id=“00919”] { –card-accent: linear-gradient(90deg, #9945ff, #ff4fd8); }
+.card[data-id=“0056”] { –card-accent: linear-gradient(90deg, #ff4fd8, #ffd26f); –glow-color: 255, 79, 216; }
+.card[data-id=“00878”] { –card-accent: linear-gradient(90deg, #00e5ff, #9945ff); –glow-color: 0, 229, 255; }
+.card[data-id=“00919”] { –card-accent: linear-gradient(90deg, #9945ff, #ff4fd8); –glow-color: 153, 69, 255; }
 
 .card-head {
 display: flex;
@@ -175,12 +201,15 @@ display: flex;
 align-items: baseline;
 gap: 10px;
 }
-  .card-code {
-    font-size: 22px;
-    font-weight: 800;
-    color: #fff;
-    text-shadow: 0 0 12px rgba(255, 79, 216, 0.8), 0 0 4px rgba(0, 229, 255, 0.6);
-  }
+.card-code {
+font-size: 24px;
+font-weight: 900;
+color: #fff;
+text-shadow:
+0 0 14px rgba(var(–glow-color), 0.9),
+0 0 4px rgba(255, 255, 255, 0.5);
+letter-spacing: 0.5px;
+}
 .card-name {
 font-size: 13px;
 color: var(–text-muted);
@@ -257,10 +286,8 @@ font-weight: 700;
 color: var(–text-primary);
 }
 .info-box.highlight .value {
-background: linear-gradient(135deg, #ffd26f, #ff4fd8);
--webkit-background-clip: text;
-background-clip: text;
-color: transparent;
+color: #fff;
+text-shadow: 0 0 12px rgba(255, 210, 111, 0.7);
 }
 
 /* 預估股息亮點 */
@@ -281,10 +308,10 @@ margin-bottom: 6px;
 .estimate .amount {
 font-size: 26px;
 font-weight: 800;
-background: linear-gradient(135deg, #ffd26f, #ff4fd8, #9945ff);
--webkit-background-clip: text;
-background-clip: text;
-color: transparent;
+color: #fff;
+text-shadow:
+0 0 16px rgba(255, 79, 216, 0.7),
+0 0 4px rgba(255, 210, 111, 0.5);
 }
 .estimate .hint {
 font-size: 11px;
@@ -332,7 +359,8 @@ line-height: 1.7;
 @media (max-width: 380px) {
 header h1 { font-size: 22px; }
 .dash-total { font-size: 28px; }
-.card-code { font-size: 20px; }
+.card-code { font-size: 22px; }
+.dash-year .year-value { font-size: 20px; }
 }
 </style>
 
@@ -351,13 +379,17 @@ header h1 { font-size: 22px; }
       <span>📦 總張數 <b id="totalShares">0</b></span>
       <span>💰 本季預估股息 <b id="totalDividend">NT$ 0</b></span>
     </div>
+    <div class="dash-year">
+      <span class="year-label">🌟 預估年股息收入</span>
+      <span class="year-value" id="totalYearDividend">NT$ 0</span>
+    </div>
   </div>
 
   <div id="cards"></div>
 
   <footer>
     ⚡ 資料僅供參考 · 持股資料會自動儲存於本機<br>
-    配息資訊以各投信公告為準
+    年股息 = 最近一次配息 × 4 估算，實際以各投信公告為準
   </footer>
 </div>
 
@@ -369,6 +401,7 @@ const ETFS = [
     name: "元大高股息",
     price: 39.41,
     dividend: 1.00,
+    freq: 4,
     exDate: "2026-04-23",
     payDate: "2026-05-14",
     note: "2026 Q2 配息"
@@ -378,6 +411,7 @@ const ETFS = [
     name: "國泰永續高股息",
     price: 21.81,
     dividend: 0.42,
+    freq: 4,
     exDate: "2026-05-19",
     payDate: "2026-06-16",
     note: "2026 Q2 配息（預估，實際以公告為準）"
@@ -387,6 +421,7 @@ const ETFS = [
     name: "群益台灣精選高息",
     price: 22.92,
     dividend: 0.78,
+    freq: 4,
     exDate: "2026-06-16",
     payDate: "2026-07-14",
     note: "2026 Q2 配息（預估，實際以公告為準）"
@@ -410,7 +445,6 @@ function fmtMoney(n) {
   return "NT$ " + Math.round(n).toLocaleString();
 }
 function fmtDate(d) {
-  // "2026-04-23" → "04/23 (四)"
   const [y, m, day] = d.split("-").map(Number);
   const date = new Date(y, m - 1, day);
   const weeks = ["日","一","二","三","四","五","六"];
@@ -425,6 +459,7 @@ function renderCards() {
     const stockCount = shares * 1000;
     const marketValue = stockCount * etf.price;
     const estDividend = stockCount * etf.dividend;
+    const yearDividend = estDividend * (etf.freq || 4);
 
     const card = document.createElement("div");
     card.className = "card";
@@ -467,7 +502,7 @@ function renderCards() {
       <div class="estimate">
         <div class="label">本次預估可領股息</div>
         <div class="amount">${fmtMoney(estDividend)}</div>
-        <div class="hint">${etf.note}</div>
+        <div class="hint">${etf.note}　|　年估 ${fmtMoney(yearDividend)}</div>
       </div>
 
       <button class="btn-calendar" data-id="${etf.id}">
@@ -485,7 +520,6 @@ function renderCards() {
       holdings[id] = val;
       saveHoldings(holdings);
       renderDashboard();
-      // 更新該卡片的顯示值
       updateCardValues(id);
     });
   });
@@ -507,21 +541,25 @@ function updateCardValues(id) {
   const stockCount = shares * 1000;
   const marketValue = stockCount * etf.price;
   const estDividend = stockCount * etf.dividend;
+  const yearDividend = estDividend * (etf.freq || 4);
   card.querySelector(".info-box.highlight .value").textContent = fmtMoney(marketValue);
   card.querySelector(".estimate .amount").textContent = fmtMoney(estDividend);
+  card.querySelector(".estimate .hint").textContent = `${etf.note}　|　年估 ${fmtMoney(yearDividend)}`;
 }
 
 function renderDashboard() {
-  let totalValue = 0, totalShares = 0, totalDiv = 0;
+  let totalValue = 0, totalShares = 0, totalDiv = 0, totalYearDiv = 0;
   ETFS.forEach(etf => {
     const s = holdings[etf.id] || 0;
     totalShares += s;
     totalValue += s * 1000 * etf.price;
     totalDiv += s * 1000 * etf.dividend;
+    totalYearDiv += s * 1000 * etf.dividend * (etf.freq || 4);
   });
   document.getElementById("totalValue").textContent = fmtMoney(totalValue);
   document.getElementById("totalShares").textContent = totalShares.toLocaleString(undefined, {maximumFractionDigits: 3});
   document.getElementById("totalDividend").textContent = fmtMoney(totalDiv);
+  document.getElementById("totalYearDividend").textContent = fmtMoney(totalYearDiv);
 }
 
 // 產生 ICS 檔案
