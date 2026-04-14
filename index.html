@@ -5,7 +5,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>✨ ETF 股息追蹤器 · Cosmic Dividend</title>
-  <link rel="apple-touch-icon" href="IMG_6529.png">
+<link rel="apple-touch-icon" href="IMG_6529.png">
 <link rel="apple-touch-icon" sizes="180x180" href="IMG_6529.png">
 <link rel="icon" type="image/png" href="IMG_6529.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -33,7 +33,6 @@
     position: relative;
     padding: 24px 16px 60px;
   }
-  /* 星空 + 漸層背景 */
   body::before {
     content: "";
     position: fixed;
@@ -65,38 +64,22 @@
     z-index: -1;
     animation: twinkle 4s ease-in-out infinite alternate;
   }
-  @keyframes drift {
-    0% { transform: scale(1) translate(0,0); }
-    100% { transform: scale(1.05) translate(-10px,-10px); }
-  }
-  @keyframes twinkle {
-    0% { opacity: 0.3; }
-    100% { opacity: 0.6; }
-  }
+  @keyframes drift { 0% { transform: scale(1) translate(0,0); } 100% { transform: scale(1.05) translate(-10px,-10px); } }
+  @keyframes twinkle { 0% { opacity: 0.3; } 100% { opacity: 0.6; } }
 
 .wrap { max-width: 820px; margin: 0 auto; }
 
-header {
-text-align: center;
-padding: 16px 8px 28px;
-}
+header { text-align: center; padding: 16px 8px 28px; }
 header h1 {
 font-size: 26px;
 font-weight: 800;
 letter-spacing: 1px;
 color: #fff;
-text-shadow:
-0 0 20px rgba(255, 79, 216, 0.6),
-0 0 40px rgba(153, 69, 255, 0.4);
+text-shadow: 0 0 20px rgba(255, 79, 216, 0.6), 0 0 40px rgba(153, 69, 255, 0.4);
 margin-bottom: 6px;
 }
-header .sub {
-font-size: 13px;
-color: var(–text-muted);
-letter-spacing: 0.5px;
-}
+header .sub { font-size: 13px; color: var(–text-muted); letter-spacing: 0.5px; }
 
-/* 總覽儀表板 */
 .dashboard {
 backdrop-filter: blur(24px) saturate(160%);
 -webkit-backdrop-filter: blur(24px) saturate(160%);
@@ -116,34 +99,18 @@ inset: 0;
 background: linear-gradient(135deg, rgba(255, 79, 216, 0.12), transparent 50%, rgba(0, 229, 255, 0.12));
 pointer-events: none;
 }
-.dash-title {
-font-size: 12px;
-color: var(–text-muted);
-letter-spacing: 2px;
-margin-bottom: 8px;
-position: relative;
-}
+.dash-title { font-size: 12px; color: var(–text-muted); letter-spacing: 2px; margin-bottom: 8px; position: relative; }
 .dash-total {
 font-size: 34px;
 font-weight: 800;
 color: #fff;
-text-shadow:
-0 0 18px rgba(255, 210, 111, 0.7),
-0 0 4px rgba(255, 79, 216, 0.5);
+text-shadow: 0 0 18px rgba(255, 210, 111, 0.7), 0 0 4px rgba(255, 79, 216, 0.5);
 position: relative;
 margin-bottom: 10px;
 }
-.dash-sub {
-display: flex;
-gap: 16px;
-flex-wrap: wrap;
-font-size: 13px;
-color: var(–text-muted);
-position: relative;
-}
+.dash-sub { display: flex; gap: 16px; flex-wrap: wrap; font-size: 13px; color: var(–text-muted); position: relative; }
 .dash-sub span b { color: var(–accent-cyan); font-weight: 700; }
 
-/* 年股息區塊 */
 .dash-year {
 margin-top: 14px;
 padding-top: 14px;
@@ -155,21 +122,22 @@ position: relative;
 flex-wrap: wrap;
 gap: 8px;
 }
-.dash-year .year-label {
-font-size: 12px;
-color: var(–text-muted);
-letter-spacing: 1px;
-}
+.dash-year .year-label { font-size: 12px; color: var(–text-muted); letter-spacing: 1px; }
 .dash-year .year-value {
 font-size: 24px;
 font-weight: 800;
 color: #fff;
-text-shadow:
-0 0 18px rgba(0, 229, 255, 0.7),
-0 0 4px rgba(255, 210, 111, 0.6);
+text-shadow: 0 0 18px rgba(0, 229, 255, 0.7), 0 0 4px rgba(255, 210, 111, 0.6);
+}
+.dash-year-hint {
+display: block;
+width: 100%;
+font-size: 10px;
+color: var(–text-muted);
+margin-top: 4px;
+letter-spacing: 0.3px;
 }
 
-/* ETF 卡片 */
 .card {
 backdrop-filter: blur(22px) saturate(160%);
 -webkit-backdrop-filter: blur(22px) saturate(160%);
@@ -194,32 +162,16 @@ opacity: 0.9;
 .card[data-id=“00878”] { –card-accent: linear-gradient(90deg, #00e5ff, #9945ff); –glow-color: 0, 229, 255; }
 .card[data-id=“00919”] { –card-accent: linear-gradient(90deg, #9945ff, #ff4fd8); –glow-color: 153, 69, 255; }
 
-.card-head {
-display: flex;
-align-items: center;
-justify-content: space-between;
-margin-bottom: 14px;
-flex-wrap: wrap;
-gap: 8px;
-}
-.card-title {
-display: flex;
-align-items: baseline;
-gap: 10px;
-}
+.card-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; flex-wrap: wrap; gap: 8px; }
+.card-title { display: flex; align-items: baseline; gap: 10px; }
 .card-code {
 font-size: 24px;
 font-weight: 900;
 color: #fff;
-text-shadow:
-0 0 14px rgba(var(–glow-color), 0.9),
-0 0 4px rgba(255, 255, 255, 0.5);
+text-shadow: 0 0 14px rgba(var(–glow-color), 0.9), 0 0 4px rgba(255, 255, 255, 0.5);
 letter-spacing: 0.5px;
 }
-.card-name {
-font-size: 13px;
-color: var(–text-muted);
-}
+.card-name { font-size: 13px; color: var(–text-muted); }
 .price-tag {
 font-size: 13px;
 color: var(–text-primary);
@@ -231,7 +183,6 @@ backdrop-filter: blur(10px);
 }
 .price-tag b { color: var(–accent-gold); font-size: 15px; }
 
-/* 持股輸入區 */
 .holding {
 display: flex;
 align-items: center;
@@ -242,11 +193,7 @@ background: rgba(255,255,255,0.04);
 border: 1px solid rgba(255,255,255,0.1);
 border-radius: 14px;
 }
-.holding label {
-font-size: 12px;
-color: var(–text-muted);
-white-space: nowrap;
-}
+.holding label { font-size: 12px; color: var(–text-muted); white-space: nowrap; }
 .holding input {
 flex: 1;
 min-width: 0;
@@ -261,42 +208,20 @@ text-align: right;
 outline: none;
 transition: all 0.25s;
 }
-.holding input:focus {
-border-color: var(–accent-cyan);
-box-shadow: 0 0 0 3px rgba(0, 229, 255, 0.2);
-}
+.holding input:focus { border-color: var(–accent-cyan); box-shadow: 0 0 0 3px rgba(0, 229, 255, 0.2); }
 .holding .unit { font-size: 12px; color: var(–text-muted); }
 
-/* 資訊格 */
-.info-grid {
-display: grid;
-grid-template-columns: 1fr 1fr;
-gap: 10px;
-margin-bottom: 14px;
-}
+.info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
 .info-box {
 background: rgba(255,255,255,0.04);
 border: 1px solid rgba(255,255,255,0.1);
 border-radius: 12px;
 padding: 10px 12px;
 }
-.info-box .label {
-font-size: 11px;
-color: var(–text-muted);
-letter-spacing: 0.5px;
-margin-bottom: 4px;
-}
-.info-box .value {
-font-size: 15px;
-font-weight: 700;
-color: var(–text-primary);
-}
-.info-box.highlight .value {
-color: #fff;
-text-shadow: 0 0 12px rgba(255, 210, 111, 0.7);
-}
+.info-box .label { font-size: 11px; color: var(–text-muted); letter-spacing: 0.5px; margin-bottom: 4px; }
+.info-box .value { font-size: 15px; font-weight: 700; color: var(–text-primary); }
+.info-box.highlight .value { color: #fff; text-shadow: 0 0 12px rgba(255, 210, 111, 0.7); }
 
-/* 預估股息亮點 */
 .estimate {
 background: linear-gradient(135deg, rgba(255,79,216,0.12), rgba(0,229,255,0.12));
 border: 1px solid rgba(255,255,255,0.18);
@@ -305,27 +230,60 @@ padding: 14px;
 margin-bottom: 14px;
 text-align: center;
 }
-.estimate .label {
-font-size: 11px;
-color: var(–text-muted);
-letter-spacing: 1px;
-margin-bottom: 6px;
-}
+.estimate .label { font-size: 11px; color: var(–text-muted); letter-spacing: 1px; margin-bottom: 6px; }
 .estimate .amount {
 font-size: 26px;
 font-weight: 800;
 color: #fff;
-text-shadow:
-0 0 16px rgba(255, 79, 216, 0.7),
-0 0 4px rgba(255, 210, 111, 0.5);
+text-shadow: 0 0 16px rgba(255, 79, 216, 0.7), 0 0 4px rgba(255, 210, 111, 0.5);
 }
-.estimate .hint {
+.estimate .hint { font-size: 11px; color: var(–text-muted); margin-top: 4px; }
+
+/* 回測四次配息小表 */
+.history {
+margin-bottom: 14px;
+padding: 10px 12px;
+background: rgba(255,255,255,0.03);
+border: 1px solid rgba(255,255,255,0.08);
+border-radius: 12px;
+}
+.history .h-title {
 font-size: 11px;
 color: var(–text-muted);
-margin-top: 4px;
+margin-bottom: 6px;
+letter-spacing: 0.5px;
 }
+.history .h-row {
+display: flex;
+justify-content: space-between;
+gap: 6px;
+font-size: 12px;
+}
+.history .h-item {
+flex: 1;
+text-align: center;
+padding: 6px 4px;
+background: rgba(255,255,255,0.04);
+border-radius: 8px;
+}
+.history .h-item .q {
+display: block;
+font-size: 9px;
+color: var(–text-muted);
+margin-bottom: 2px;
+}
+.history .h-item .v {
+font-weight: 700;
+color: var(–accent-gold);
+}
+.history .h-total {
+margin-top: 6px;
+font-size: 11px;
+text-align: right;
+color: var(–text-muted);
+}
+.history .h-total b { color: var(–accent-cyan); font-weight: 700; }
 
-/* 加入行事曆按鈕 */
 .btn-calendar {
 width: 100%;
 background: linear-gradient(135deg, #9945ff 0%, #ff4fd8 50%, #00e5ff 100%);
@@ -342,31 +300,18 @@ box-shadow: 0 6px 20px rgba(153, 69, 255, 0.4);
 transition: all 0.3s;
 animation: gradientMove 4s ease infinite;
 }
-@keyframes gradientMove {
-0%, 100% { background-position: 0% 50%; }
-50% { background-position: 100% 50%; }
-}
+@keyframes gradientMove { 0%, 100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
 .btn-calendar:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(153, 69, 255, 0.6); }
 .btn-calendar:active { transform: translateY(0); }
-.btn-calendar:disabled {
-opacity: 0.5;
-cursor: not-allowed;
-animation: none;
-}
 
-footer {
-text-align: center;
-font-size: 11px;
-color: var(–text-muted);
-margin-top: 24px;
-line-height: 1.7;
-}
+footer { text-align: center; font-size: 11px; color: var(–text-muted); margin-top: 24px; line-height: 1.7; }
 
 @media (max-width: 380px) {
 header h1 { font-size: 22px; }
 .dash-total { font-size: 28px; }
 .card-code { font-size: 22px; }
 .dash-year .year-value { font-size: 20px; }
+.history .h-row { font-size: 11px; }
 }
 </style>
 
@@ -388,6 +333,7 @@ header h1 { font-size: 22px; }
     <div class="dash-year">
       <span class="year-label">🌟 預估年股息收入</span>
       <span class="year-value" id="totalYearDividend">NT$ 0</span>
+      <span class="dash-year-hint">📈 以最近四次實際配息回測估算</span>
     </div>
   </div>
 
@@ -395,66 +341,82 @@ header h1 { font-size: 22px; }
 
   <footer>
     ⚡ 資料僅供參考 · 持股資料會自動儲存於本機<br>
-    年股息 = 最近一次配息 × 4 估算，實際以各投信公告為準
+    年股息採最近 4 次實際已配息金額加總估算
   </footer>
 </div>
 
 <script>
 // ETF 資料（2026/04 更新）
+// history: 最近四次「已配息」金額，由舊到新排列
 const ETFS = [
   {
     id: "0056",
     name: "元大高股息",
     price: 39.41,
     dividend: 1.00,
-    freq: 4,
     exDate: "2026-04-23",
     payDate: "2026-05-14",
-    note: "2026 Q2 配息"
+    note: "2026 Q2 配息",
+    history: [
+      { q: "25Q2", v: 1.07 },
+      { q: "25Q3", v: 1.07 },
+      { q: "25Q4", v: 0.866 },
+      { q: "26Q1", v: 0.866 }
+    ]
   },
   {
     id: "00878",
     name: "國泰永續高股息",
     price: 21.81,
     dividend: 0.42,
-    freq: 4,
     exDate: "2026-05-19",
     payDate: "2026-06-16",
-    note: "2026 Q2 配息（預估，實際以公告為準）"
+    note: "2026 Q2 配息（預估，實際以公告為準）",
+    history: [
+      { q: "25Q1", v: 0.47 },
+      { q: "25Q2", v: 0.40 },
+      { q: "25Q3", v: 0.40 },
+      { q: "25Q4", v: 0.42 }
+    ]
   },
   {
     id: "00919",
     name: "群益台灣精選高息",
     price: 22.92,
     dividend: 0.78,
-    freq: 4,
     exDate: "2026-06-16",
     payDate: "2026-07-14",
-    note: "2026 Q2 配息（預估，實際以公告為準）"
+    note: "2026 Q2 配息（預估，實際以公告為準）",
+    history: [
+      { q: "25Q2", v: 0.72 },
+      { q: "25Q3", v: 0.54 },
+      { q: "25Q4", v: 0.54 },
+      { q: "26Q1", v: 0.78 }
+    ]
   }
 ];
 
 const STORAGE_KEY = "cosmic_etf_holdings_v1";
 
 function loadHoldings() {
-  try {
-    return JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
-  } catch (e) { return {}; }
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}"); }
+  catch (e) { return {}; }
 }
-function saveHoldings(h) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(h));
-}
+function saveHoldings(h) { localStorage.setItem(STORAGE_KEY, JSON.stringify(h)); }
 
 const holdings = loadHoldings();
 
-function fmtMoney(n) {
-  return "NT$ " + Math.round(n).toLocaleString();
-}
+function fmtMoney(n) { return "NT$ " + Math.round(n).toLocaleString(); }
 function fmtDate(d) {
   const [y, m, day] = d.split("-").map(Number);
   const date = new Date(y, m - 1, day);
   const weeks = ["日","一","二","三","四","五","六"];
   return `${String(m).padStart(2,"0")}/${String(day).padStart(2,"0")} (${weeks[date.getDay()]})`;
+}
+
+// 計算每檔 ETF 最近四次加總（用於年化估算）
+function getYearlyPerShare(etf) {
+  return etf.history.reduce((sum, h) => sum + h.v, 0);
 }
 
 function renderCards() {
@@ -465,7 +427,12 @@ function renderCards() {
     const stockCount = shares * 1000;
     const marketValue = stockCount * etf.price;
     const estDividend = stockCount * etf.dividend;
-    const yearDividend = estDividend * (etf.freq || 4);
+    const yearlyPerShare = getYearlyPerShare(etf);
+    const yearDividend = stockCount * yearlyPerShare;
+
+    const historyHTML = etf.history.map(h =>
+      `<div class="h-item"><span class="q">${h.q}</span><span class="v">$${h.v.toFixed(3)}</span></div>`
+    ).join("");
 
     const card = document.createElement("div");
     card.className = "card";
@@ -492,7 +459,7 @@ function renderCards() {
           <div class="value">${fmtMoney(marketValue)}</div>
         </div>
         <div class="info-box">
-          <div class="label">🎁 每股配息</div>
+          <div class="label">🎁 本季每股配息</div>
           <div class="value">$${etf.dividend.toFixed(3)}</div>
         </div>
         <div class="info-box">
@@ -503,6 +470,12 @@ function renderCards() {
           <div class="label">💸 發放日</div>
           <div class="value">${fmtDate(etf.payDate)}</div>
         </div>
+      </div>
+
+      <div class="history">
+        <div class="h-title">📊 最近四次實際配息回測</div>
+        <div class="h-row">${historyHTML}</div>
+        <div class="h-total">四次合計每股 <b>$${yearlyPerShare.toFixed(3)}</b></div>
       </div>
 
       <div class="estimate">
@@ -518,7 +491,6 @@ function renderCards() {
     container.appendChild(card);
   });
 
-  // 綁定事件
   document.querySelectorAll(".shares-input").forEach(inp => {
     inp.addEventListener("input", e => {
       const id = e.target.getAttribute("data-id");
@@ -547,7 +519,7 @@ function updateCardValues(id) {
   const stockCount = shares * 1000;
   const marketValue = stockCount * etf.price;
   const estDividend = stockCount * etf.dividend;
-  const yearDividend = estDividend * (etf.freq || 4);
+  const yearDividend = stockCount * getYearlyPerShare(etf);
   card.querySelector(".info-box.highlight .value").textContent = fmtMoney(marketValue);
   card.querySelector(".estimate .amount").textContent = fmtMoney(estDividend);
   card.querySelector(".estimate .hint").textContent = `${etf.note}　|　年估 ${fmtMoney(yearDividend)}`;
@@ -560,7 +532,7 @@ function renderDashboard() {
     totalShares += s;
     totalValue += s * 1000 * etf.price;
     totalDiv += s * 1000 * etf.dividend;
-    totalYearDiv += s * 1000 * etf.dividend * (etf.freq || 4);
+    totalYearDiv += s * 1000 * getYearlyPerShare(etf);
   });
   document.getElementById("totalValue").textContent = fmtMoney(totalValue);
   document.getElementById("totalShares").textContent = totalShares.toLocaleString(undefined, {maximumFractionDigits: 3});
@@ -568,11 +540,10 @@ function renderDashboard() {
   document.getElementById("totalYearDividend").textContent = fmtMoney(totalYearDiv);
 }
 
-// 產生 ICS 檔案
 function downloadICS(etf) {
   const shares = holdings[etf.id] || 0;
   const estDiv = Math.round(shares * 1000 * etf.dividend);
-  const toICSDate = d => d.replace(/-/g, "") ;
+  const toICSDate = d => d.replace(/-/g, "");
   const now = new Date();
   const stamp = now.toISOString().replace(/[-:]/g,"").split(".")[0] + "Z";
 
@@ -626,7 +597,6 @@ function downloadICS(etf) {
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
-// 初始化
 renderCards();
 renderDashboard();
 </script>
