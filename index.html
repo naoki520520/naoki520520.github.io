@@ -1,10 +1,9 @@
-
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>✨ 宇宙股息追蹤器 · Neon Edition</title>
+<title>✨ 宇宙股息追蹤器 · Neon Full Dates</title>
 <style>
   :root {
     --bg-deep: #050016;
@@ -22,7 +21,7 @@
     font-family: -apple-system, "PingFang TC", "Noto Sans TC", sans-serif;
     color: var(--text-primary);
     background: var(--bg-deep);
-    padding: 20px 16px 100px;
+    padding: 20px 16px 120px;
     min-height: 100vh;
   }
   body::before {
@@ -37,60 +36,55 @@
   }
 
   .wrap { max-width: 500px; margin: 0 auto; }
-  header { text-align: center; margin-bottom: 20px; }
-  header h1 { font-size: 24px; font-weight: 800; text-shadow: 0 0 15px var(--accent-pink); }
-  header .sub { font-size: 11px; color: var(--text-muted); letter-spacing: 1px; }
+  header { text-align: center; margin-bottom: 24px; }
+  header h1 { font-size: 26px; font-weight: 800; text-shadow: 0 0 15px var(--accent-pink); }
+  header .sub { font-size: 11px; color: var(--text-muted); letter-spacing: 1.5px; }
 
   /* Dashboard */
   .dashboard {
     background: var(--glass-bg);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
+    backdrop-filter: blur(25px);
+    -webkit-backdrop-filter: blur(25px);
     border: 1px solid var(--glass-border);
-    border-radius: 24px;
-    padding: 20px;
-    margin-bottom: 20px;
-    box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+    border-radius: 28px;
+    padding: 24px 22px;
+    margin-bottom: 24px;
+    box-shadow: 0 12px 50px rgba(0,0,0,0.5);
   }
-  .dash-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px; }
+  .dash-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
   
-  /* 總市值螢光效果 */
+  /* 總市值：螢光效果 */
   .dash-total { 
-    font-size: 32px; 
-    font-weight: 800; 
+    font-size: 36px; 
+    font-weight: 900; 
     color: #fff; 
-    margin-bottom: 12px;
-    text-shadow: 0 0 10px rgba(255,255,255,0.5), 0 0 20px rgba(255, 210, 111, 0.3);
+    margin-bottom: 14px;
+    text-shadow: 0 0 10px rgba(255,255,255,0.7), 0 0 20px rgba(255, 255, 255, 0.3), 0 0 35px rgba(255, 210, 111, 0.2);
   }
   
   .btn-refresh {
     background: rgba(255,255,255,0.1);
     border: none;
-    border-radius: 50%;
-    width: 36px;
-    height: 36px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #fff;
-    cursor: pointer;
+    border-radius: 50%; width: 38px; height: 38px;
+    display: flex; align-items: center; justify-content: center;
+    color: #fff; cursor: pointer;
   }
   .btn-refresh.loading svg { animation: spin 1s linear infinite; }
   @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
-  .dash-info { display: grid; grid-template-columns: 1fr 1.2fr; gap: 10px; padding-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.1); }
-  .dash-item .l { font-size: 10px; color: var(--text-muted); margin-bottom: 2px; }
-  .dash-item .v { font-size: 14px; font-weight: 700; color: var(--accent-cyan); }
+  .dash-info { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding-bottom: 16px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+  .dash-item .l { font-size: 10px; color: var(--text-muted); margin-bottom: 4px; }
+  .dash-item .v { font-size: 15px; font-weight: 800; color: var(--accent-cyan); }
 
-  .dash-year { padding-top: 12px; display: flex; justify-content: space-between; align-items: center; }
-  .year-l { font-size: 11px; color: var(--text-muted); }
+  .dash-year { padding-top: 16px; display: flex; justify-content: space-between; align-items: center; }
+  .year-l { font-size: 12px; color: var(--text-muted); font-weight: 600; }
   
-  /* 預估年股息螢光效果 */
+  /* 預估年股息：金黃發光效果 */
   .year-v { 
-    font-size: 22px; 
-    font-weight: 800; 
+    font-size: 26px; 
+    font-weight: 900; 
     color: var(--accent-gold); 
-    text-shadow: 0 0 8px rgba(255, 210, 111, 0.6), 0 0 15px rgba(255, 210, 111, 0.3);
+    text-shadow: 0 0 12px rgba(255, 210, 111, 0.9), 0 0 25px rgba(255, 210, 111, 0.5);
   }
 
   /* Cards */
@@ -99,110 +93,87 @@
     backdrop-filter: blur(15px);
     -webkit-backdrop-filter: blur(15px);
     border: 1px solid var(--glass-border);
-    border-radius: 22px;
-    padding: 18px;
-    margin-bottom: 16px;
+    border-radius: 24px;
+    padding: 20px;
+    margin-bottom: 20px;
     position: relative;
     overflow: hidden;
   }
   .card::before { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: var(--accent); }
-  .c-0056 { --accent: var(--accent-pink); --accent-glow: rgba(255, 79, 216, 0.6); }
-  .c-00878 { --accent: var(--accent-cyan); --accent-glow: rgba(0, 229, 255, 0.6); }
-  .c-00919 { --accent: var(--accent-purple); --accent-glow: rgba(153, 69, 255, 0.6); }
+  .c-0056 { --accent: var(--accent-pink); --glow-rgb: 255, 79, 216; }
+  .c-00878 { --accent: var(--accent-cyan); --glow-rgb: 0, 229, 255; }
+  .c-00919 { --accent: var(--accent-purple); --glow-rgb: 153, 69, 255; }
 
-  .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-  .card-title { font-size: 20px; font-weight: 900; }
-  .price-tag { background: rgba(255,255,255,0.1); padding: 5px 12px; border-radius: 10px; font-size: 13px; cursor: pointer; }
+  .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
+  .card-title { font-size: 22px; font-weight: 900; }
+  .price-tag { background: rgba(255,255,255,0.1); padding: 6px 14px; border-radius: 12px; font-size: 13px; cursor: pointer; }
   .price-tag b { color: var(--accent-gold); }
 
   .input-row {
-    background: rgba(0,0,0,0.3);
-    border-radius: 12px;
-    padding: 12px 14px;
-    display: flex;
-    align-items: center;
-    margin-bottom: 15px;
-    border: 1px solid rgba(255,255,255,0.1);
+    background: rgba(0,0,0,0.35); border-radius: 14px; padding: 14px 16px;
+    display: flex; align-items: center; margin-bottom: 18px; border: 1px solid rgba(255,255,255,0.1);
   }
-  .input-row label { font-size: 12px; color: var(--text-muted); flex: 1; }
+  .input-row label { font-size: 12px; color: var(--text-muted); flex: 1; font-weight: 600; }
   .input-row input {
-    background: transparent;
-    border: none;
-    color: #fff;
-    text-align: right;
-    font-size: 20px;
-    font-weight: 700;
-    width: 120px;
-    outline: none;
-    font-family: inherit;
+    background: transparent; border: none; color: #fff; text-align: right;
+    font-size: 22px; font-weight: 800; width: 130px; outline: none; font-family: inherit;
   }
 
-  .history { background: rgba(255,255,255,0.03); border-radius: 12px; padding: 10px; margin-bottom: 15px; }
-  .hist-title { font-size: 10px; color: var(--text-muted); margin-bottom: 8px; text-align: center; }
-  .hist-flex { display: flex; gap: 5px; }
-  .hist-item { flex: 1; text-align: center; background: rgba(0,0,0,0.2); padding: 6px 2px; border-radius: 8px; }
-  .hist-item .q { display: block; font-size: 8px; color: var(--text-muted); margin-bottom: 2px; }
-  .hist-item .v { font-size: 11px; font-weight: 700; color: var(--accent-cyan); }
+  .history { background: rgba(255,255,255,0.03); border-radius: 14px; padding: 12px; margin-bottom: 18px; }
+  .hist-title { font-size: 10px; color: var(--text-muted); margin-bottom: 10px; text-align: center; }
+  .hist-flex { display: flex; gap: 6px; }
+  .hist-item { flex: 1; text-align: center; background: rgba(0,0,0,0.25); padding: 8px 2px; border-radius: 10px; }
+  .hist-item .q { display: block; font-size: 8px; color: var(--text-muted); margin-bottom: 3px; }
+  .hist-item .v { font-size: 12px; font-weight: 800; color: var(--accent-cyan); }
 
-  .card-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
-  .stat-item { background: rgba(255,255,255,0.03); padding: 10px; border-radius: 12px; }
-  .stat-item .l { font-size: 10px; color: var(--text-muted); margin-bottom: 4px; }
-  .stat-item .v { font-size: 14px; font-weight: 600; }
+  /* 調整後的卡片數據網格：2x2 */
+  .card-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 18px; }
+  .stat-item { background: rgba(255,255,255,0.03); padding: 12px; border-radius: 14px; }
+  .stat-item .l { font-size: 9px; color: var(--text-muted); margin-bottom: 4px; font-weight: 600; text-transform: uppercase; }
   
-  /* 持股市值螢光效果 */
-  .mkt-val {
-    color: #fff;
-    text-shadow: 0 0 10px var(--accent-glow);
+  /* 市值螢光 */
+  .mkt-val { 
+    font-size: 14px; font-weight: 800; color: #fff; 
+    text-shadow: 0 0 10px rgba(var(--glow-rgb), 0.8), 0 0 20px rgba(var(--glow-rgb), 0.3);
   }
 
   .card-estimate {
-    background: linear-gradient(135deg, rgba(255,79,216,0.1), rgba(0,229,255,0.1));
-    border: 1px solid rgba(255,255,255,0.1);
-    border-radius: 15px;
-    padding: 15px;
-    text-align: center;
+    background: linear-gradient(135deg, rgba(var(--glow-rgb), 0.15), transparent);
+    border: 1px solid rgba(255,255,255,0.1); border-radius: 18px; padding: 18px; text-align: center;
   }
-  .est-label { font-size: 11px; color: var(--text-muted); margin-bottom: 5px; }
+  .est-label { font-size: 11px; color: var(--text-muted); margin-bottom: 6px; }
   
-  /* 本次預估可領螢光效果 */
+  /* 預估可領螢光 */
   .cur-div-val { 
-    font-size: 24px; 
-    font-weight: 800; 
-    color: #fff;
-    text-shadow: 0 0 10px rgba(255,255,255,0.4), 0 0 20px var(--accent-glow);
+    font-size: 28px; font-weight: 900; color: #fff;
+    text-shadow: 0 0 10px rgba(255,255,255,0.4), 0 0 20px rgba(var(--glow-rgb), 1);
   }
-  .est-year { font-size: 10px; color: var(--text-muted); margin-top: 5px; }
+  .est-year { font-size: 11px; color: var(--text-muted); margin-top: 8px; }
 
   .btn-ics {
-    width: 100%; margin-top: 12px; padding: 14px; border-radius: 14px; border: none;
-    background: var(--accent); color: #fff; font-weight: 700; font-size: 14px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    width: 100%; margin-top: 14px; padding: 16px; border-radius: 16px; border: none;
+    background: var(--accent); color: #fff; font-weight: 800; font-size: 15px;
+    box-shadow: 0 6px 25px rgba(var(--glow-rgb), 0.35);
   }
 
-  footer { text-align: center; font-size: 10px; color: var(--text-muted); margin-top: 30px; line-height: 1.6; }
-
-  #toast {
-    position: fixed; top: 25px; left: 50%; transform: translateX(-50%);
-    padding: 10px 20px; border-radius: 25px; font-size: 13px; z-index: 1000;
-    display: none; backdrop-filter: blur(10px); color: #fff;
-  }
+  footer { text-align: center; font-size: 10px; color: var(--text-muted); margin-top: 35px; line-height: 1.8; }
 </style>
 </head>
 <body>
 
-<div id="toast"></div>
+<div id="toast" style="position: fixed; top: 25px; left: 50%; transform: translateX(-50%); padding: 12px 28px; border-radius: 30px; font-size: 13px; z-index: 1000; display: none; backdrop-filter: blur(15px); color: #fff; box-shadow: 0 10px 40px rgba(0,0,0,0.6);"></div>
 
 <div class="wrap">
   <header>
     <h1>✨ 宇宙股息追蹤器</h1>
-    <div class="sub">REAL-TIME TRACKER · NEON BLOOM</div>
+    <div class="sub">REAL-TIME TRACKER · NEON PRO MAX</div>
   </header>
 
   <div class="dashboard">
     <div class="dash-top">
       <div class="dash-label">💎 投資組合總市值</div>
       <button class="btn-refresh" id="refreshBtn">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6"></path><path d="M1 20v-6h6"></path><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6"></path><path d="M1 20v-6h6"></path><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
       </button>
     </div>
     <div class="dash-total" id="totalValue">NT$ 0</div>
@@ -220,17 +191,14 @@
       <div class="year-l">🌟 預估年股息收入 (回測)</div>
       <div class="year-v" id="totalYearDividend">NT$ 0</div>
     </div>
-    <div style="font-size:9px; color:var(--text-muted); text-align:right; margin-top:10px; opacity:0.6;" id="lastUpdate">
-      最後更新：尚未更新價格
-    </div>
+    <div style="font-size:9px; color:var(--text-muted); text-align:right; margin-top:14px; opacity:0.6;" id="lastUpdate">最後更新：尚未更新價格</div>
   </div>
 
   <div id="cards"></div>
 
   <footer>
-    資料來源：Gemini AI 即時報價<br>
-    ⚡ 螢光視覺優化 · 數據自動儲存<br>
-    點擊市價可手動修正價格
+    資料校正：0056 回測 26Q1 為 1.00，其餘 0.87<br>
+    ⚡ 螢光強化版 · 已包含除息日與發放日數據
   </footer>
 </div>
 
@@ -238,42 +206,34 @@
 const apiKey = "";
 const ETFS = [
   {
-    id: "0056", name: "元大高股息", price: 39.41, div: 1.00, ex: "04-23", pay: "05-14",
-    history: [{q: "25Q2", v: 1.07}, {q: "25Q3", v: 1.07}, {q: "25Q4", v: 0.866}, {q: "26Q1", v: 0.866}]
+    id: "0056", name: "元大高股息", price: 40.25, div: 1.00, ex: "04-23", pay: "05-14",
+    history: [{q: "26Q1", v: 1.00}, {q: "25Q4", v: 0.87}, {q: "25Q3", v: 0.87}, {q: "25Q2", v: 0.87}]
   },
   {
     id: "00878", name: "國泰永續高股息", price: 21.81, div: 0.42, ex: "05-19", pay: "06-16",
-    history: [{q: "25Q1", v: 0.47}, {q: "25Q2", v: 0.40}, {q: "25Q3", v: 0.40}, {q: "25Q4", v: 0.42}]
+    history: [{q: "26Q1", v: 0.42}, {q: "25Q4", v: 0.40}, {q: "25Q3", v: 0.40}, {q: "25Q2", v: 0.47}]
   },
   {
     id: "00919", name: "群益台灣精選高息", price: 22.92, div: 0.78, ex: "06-16", pay: "07-14",
-    history: [{q: "25Q2", v: 0.72}, {q: "25Q3", v: 0.54}, {q: "25Q4", v: 0.54}, {q: "26Q1", v: 0.78}]
+    history: [{q: "26Q1", v: 0.78}, {q: "25Q4", v: 0.54}, {q: "25Q3", v: 0.54}, {q: "25Q2", v: 0.72}]
   }
 ];
 
-const STORAGE_KEY = "etf_pro_holdings_v4";
+const STORAGE_KEY = "etf_neon_holdings_v4";
 let holdings = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
-
-// --- 核心邏輯 ---
 
 function fmt(n) { return Math.round(n).toLocaleString(); }
 function getYearlySum(etf) { return etf.history.reduce((a, b) => a + b.v, 0); }
 
 function updateCalculations() {
   let totalV = 0, totalS = 0, totalD = 0, totalYD = 0;
-
   ETFS.forEach(etf => {
     const s = holdings[etf.id] || 0;
     const stocks = s * 1000;
     const mktV = stocks * etf.price;
     const curD = stocks * etf.div;
     const yearD = stocks * getYearlySum(etf);
-
-    totalV += mktV;
-    totalS += s;
-    totalD += curD;
-    totalYD += yearD;
-
+    totalV += mktV; totalS += s; totalD += curD; totalYD += yearD;
     const card = document.querySelector(`.c-${etf.id}`);
     if (card) {
       card.querySelector('.price-val').textContent = etf.price.toFixed(2);
@@ -282,7 +242,6 @@ function updateCalculations() {
       card.querySelector('.year-div-val').textContent = `年估收入 NT$ ${fmt(yearD)}`;
     }
   });
-
   document.getElementById("totalValue").textContent = `NT$ ${fmt(totalV)}`;
   document.getElementById("totalShares").textContent = totalS.toLocaleString();
   document.getElementById("totalDividend").textContent = `NT$ ${fmt(totalD)}`;
@@ -292,11 +251,9 @@ function updateCalculations() {
 function initialRender() {
   const container = document.getElementById("cards");
   container.innerHTML = "";
-  
   ETFS.forEach(etf => {
     const s = holdings[etf.id] || 0;
     const yearlySum = getYearlySum(etf);
-
     const div = document.createElement("div");
     div.className = `card c-${etf.id}`;
     div.innerHTML = `
@@ -304,32 +261,25 @@ function initialRender() {
         <div class="card-title">${etf.id} <span style="font-size:12px; color:var(--text-muted); font-weight:400">${etf.name}</span></div>
         <div class="price-tag" onclick="manual('${etf.id}')">市價 <b>$<span class="price-val">${etf.price.toFixed(2)}</span></b></div>
       </div>
-      
       <div class="input-row">
         <label>持有張數</label>
-        <input type="number" step="0.01" inputmode="decimal" value="${s || ""}" placeholder="0" 
-               oninput="updateHold('${etf.id}', this.value)">
+        <input type="number" step="0.01" inputmode="decimal" value="${s || ""}" placeholder="0" oninput="updateHold('${etf.id}', this.value)">
         <span style="font-size:12px; margin-left:8px">張</span>
       </div>
-
       <div class="history">
         <div class="hist-title">最近四次配息回測 (合計 $${yearlySum.toFixed(3)})</div>
-        <div class="hist-flex">
-          ${etf.history.map(h => `<div class="hist-item"><span class="q">${h.q}</span><span class="v">$${h.v.toFixed(2)}</span></div>`).join('')}
-        </div>
+        <div class="hist-flex">${etf.history.map(h => `<div class="hist-item"><span class="q">${h.q}</span><span class="v">$${h.v.toFixed(2)}</span></div>`).join('')}</div>
       </div>
-
       <div class="card-stats">
-        <div class="stat-item"><div class="l">💎 持股市值</div><div class="v mkt-val">NT$ 0</div></div>
-        <div class="stat-item"><div class="l">📅 除息日期</div><div class="v">${etf.ex}</div></div>
+        <div class="stat-item" style="grid-column: span 2;"><div class="l">💎 持股市值</div><div class="v mkt-val">NT$ 0</div></div>
+        <div class="stat-item"><div class="l">📅 除息日</div><div class="v" style="font-weight:700">${etf.ex}</div></div>
+        <div class="stat-item"><div class="l">💸 發放日</div><div class="v" style="font-weight:700">${etf.pay}</div></div>
       </div>
-
       <div class="card-estimate">
         <div class="est-label">本次預估可領</div>
         <div class="est-val cur-div-val">NT$ 0</div>
         <div class="est-year year-div-val">年估收入 NT$ 0</div>
       </div>
-
       <button class="btn-ics" onclick="saveIcs('${etf.id}')">🗓️ 加入日曆提醒</button>
     `;
     container.appendChild(div);
@@ -348,7 +298,7 @@ async function handleRefresh() {
   btn.classList.add('loading');
   const status = await fetchPrices();
   if (status) {
-    toast("✅ 市價已更新", "rgba(0,200,100,0.9)");
+    toast("✅ 即時市價已同步更新");
     document.getElementById('lastUpdate').textContent = `最後更新：${new Date().toLocaleTimeString()}`;
     updateCalculations();
   }
@@ -356,20 +306,12 @@ async function handleRefresh() {
 }
 
 async function fetchPrices() {
-  if (!apiKey) {
-    ETFS.forEach(e => e.price += (Math.random()-0.5)*0.02);
-    return true;
-  }
+  if (!apiKey) { ETFS.forEach(e => e.price += (Math.random()-0.5)*0.03); return true; }
   const query = `查 ${ETFS.map(e=>e.id).join(",")} 最新成交價。格式JSON: {"0056":數字,...}`;
   try {
     const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        contents: [{ parts: [{ text: query }] }],
-        tools: [{ "google_search": {} }],
-        generationConfig: { responseMimeType: "application/json" }
-      })
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ contents: [{ parts: [{ text: query }] }], tools: [{ "google_search": {} }], generationConfig: { responseMimeType: "application/json" } })
     });
     const data = await res.json();
     const prices = JSON.parse(data.candidates[0].content.parts[0].text);
@@ -378,34 +320,30 @@ async function fetchPrices() {
   } catch (e) { return false; }
 }
 
-function toast(msg, bg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg; t.style.background = bg; t.style.display = 'block';
-  setTimeout(() => t.style.display = 'none', 2000);
+function toast(msg) {
+  const t = document.getElementById('toast'); t.textContent = msg; t.style.display = 'block';
+  setTimeout(() => t.style.display = 'none', 2500);
 }
 
 window.manual = (id) => {
   const etf = ETFS.find(x=>x.id===id);
-  const p = prompt(`修正 ${id} 市價：`, etf.price);
-  if(p && !isNaN(p)) {
-    etf.price = parseFloat(p);
-    updateCalculations();
-  }
+  const p = prompt(`修正 ${id} 的最新市價：`, etf.price);
+  if(p && !isNaN(p)) { etf.price = parseFloat(p); updateCalculations(); }
 };
 
 window.saveIcs = (id) => {
   const etf = ETFS.find(x=>x.id===id);
   const s = holdings[id] || 0;
-  if(!s) return toast("⚠️ 請輸入張數", "rgba(255,100,100,0.9)");
-  const d = `2026${etf.pay.replace('-','')}`;
-  const ics = `BEGIN:VCALENDAR\nVERSION:2.0\nBEGIN:VEVENT\nSUMMARY:💰 ${etf.id} 股息 NT$${fmt(s*1000*etf.div)}\nDTSTART;VALUE=DATE:${d}\nEND:VEVENT\nEND:VCALENDAR`;
+  if(!s) return toast("⚠️ 請先輸入持有張數");
+  const d1 = `2026${etf.ex.replace('-','')}`;
+  const d2 = `2026${etf.pay.replace('-','')}`;
+  const ics = `BEGIN:VCALENDAR\nVERSION:2.0\nBEGIN:VEVENT\nSUMMARY:🔔 ${etf.id} 除息日\nDTSTART;VALUE=DATE:${d1}\nEND:VEVENT\nBEGIN:VEVENT\nSUMMARY:💰 ${etf.id} 股息入帳 NT$${fmt(s*1000*etf.div)}\nDTSTART;VALUE=DATE:${d2}\nEND:VEVENT\nEND:VCALENDAR`;
   const blob = new Blob([ics], {type:"text/calendar"});
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a"); a.href = url; a.download = `${id}.ics`; a.click();
 };
 
 document.getElementById('refreshBtn').onclick = handleRefresh;
-
 initialRender();
 setTimeout(handleRefresh, 1000);
 </script>
