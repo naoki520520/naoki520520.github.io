@@ -198,7 +198,7 @@
 
   <footer>
     資料校正：0056 回測 26Q1 為 1.00，其餘 0.87<br>
-    ⚡ 螢光強化版 · 已包含除息日與發放日數據
+    ⚡ 螢光強化版 · 配息回測資料每日更新
   </footer>
 </div>
 
@@ -271,16 +271,14 @@ function initialRender() {
         <div class="hist-flex">${etf.history.map(h => `<div class="hist-item"><span class="q">${h.q}</span><span class="v">$${h.v.toFixed(2)}</span></div>`).join('')}</div>
       </div>
       <div class="card-stats">
-        <div class="stat-item" style="grid-column: span 2;"><div class="l">💎 持股市值</div><div class="v mkt-val">NT$ 0</div></div>
-        <div class="stat-item"><div class="l">📅 除息日</div><div class="v" style="font-weight:700">${etf.ex}</div></div>
-        <div class="stat-item"><div class="l">💸 發放日</div><div class="v" style="font-weight:700">${etf.pay}</div></div>
-      </div>
+  <div class="stat-item" style="grid-column: span 2;"><div class="l">💎 持股市值</div><div class="v mkt-val">NT$ 0</div></div>
+</div>
       <div class="card-estimate">
         <div class="est-label">本次預估可領</div>
         <div class="est-val cur-div-val">NT$ 0</div>
         <div class="est-year year-div-val">年估收入 NT$ 0</div>
       </div>
-      <button class="btn-ics" onclick="saveIcs('${etf.id}')">🗓️ 加入日曆提醒</button>
+    
     `;
     container.appendChild(div);
   });
@@ -389,17 +387,7 @@ window.manual = (id) => {
   if(p && !isNaN(p)) { etf.price = parseFloat(p); updateCalculations(); }
 };
 
-window.saveIcs = (id) => {
-  const etf = ETFS.find(x=>x.id===id);
-  const s = holdings[id] || 0;
-  if(!s) return toast("⚠️ 請先輸入持有張數");
-  const d1 = `2026${etf.ex.replace('-','')}`;
-  const d2 = `2026${etf.pay.replace('-','')}`;
-  const ics = `BEGIN:VCALENDAR\nVERSION:2.0\nBEGIN:VEVENT\nSUMMARY:🔔 ${etf.id} 除息日\nDTSTART;VALUE=DATE:${d1}\nEND:VEVENT\nBEGIN:VEVENT\nSUMMARY:💰 ${etf.id} 股息入帳 NT$${fmt(s*1000*etf.div)}\nDTSTART;VALUE=DATE:${d2}\nEND:VEVENT\nEND:VCALENDAR`;
-  const blob = new Blob([ics], {type:"text/calendar"});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a"); a.href = url; a.download = `${id}.ics`; a.click();
-};
+
 
 document.getElementById('refreshBtn').onclick = handleRefresh;
 
