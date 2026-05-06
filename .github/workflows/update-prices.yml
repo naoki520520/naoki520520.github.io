@@ -1,0 +1,102 @@
+name: Update ETF Prices
+
+on:
+  schedule:
+    # 台灣時間週一到週五 09:00-13:50，每 10 分鐘更新一次
+    # GitHub Actions 使用 UTC，所以是 01:00-05:50 UTC
+    - cron: '*/10 1-5 * * 1-5'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  update-prices:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Fetch TWSE ETF prices
+        run: |
+          python - <<'PY'
+          import json
+          import urllib.parse
+          import urllib.request
+          from datetime import datetime, timezone, timedelta
+
+          SYMBOLS = ['0056', '00878', '00919']
+          URL = 'https://mis.twse.com.tw/stock/api/getStockInfo.jsp?ex_ch=' + urllib.parse.quote('|'.join(f'tse_{symbol}.tw' for symbol in SYMBOLS))
+          HEADERS = {
+              'User-Agent': 'Mozilla/5.0',
+              'Referer': 'https://mis.twse.com.tw/stock/fibest.jsp?lang=zh_tw'
+          }
+
+          def to_number(value):
+              if value is None:
+                  return None
+              value = str(value).replace(',', '').strip()
+              if not value or value == '-':
+                  return None
+              try:
+                  return float(value)
+              except ValueError:
+                  return None
+
+          def fetch_twse_realtime():
+              req = urllib.request.Request(URL, headers=HEADERS)
+              with urllib.request.urlopen(req, timeout=20) as res:
+                  raw = res.read().decode('utf-8')
+              data = json.loads(raw)
+              result = {}
+
+              for item in data.get('msgArray', []):
+                  symbol = item.get('c')
+                  if symbol not in SYMBOLS:
+                      continue
+
+                  # z = 最新成交價；盤後可能是 "-"，所以備援用昨收 y 或開盤價 o
+                  price = to_number(item.get('z')) or to_number(item.get('y')) or to_number(item.get('o'))
+
+                  if price:
+                      result[symbol] = {
+                          'price': price,
+                          'name': item.get('n') or symbol,
+                          'source': 'TWSE MIS',
+                          'tradeTime': f"{item.get('d', '')} {item.get('t', '')}".strip(),
+                      }
+
+              return result
+
+          tz = timezone(timedelta(hours=8))
+          now = datetime.now(tz).isoformat(timespec='seconds')
+          prices = fetch_twse_realtime()
+
+          if not prices:
+              raise SystemExit('No prices fetched from TWSE MIS')
+
+          output = {
+              'updatedAt': now,
+              'timezone': 'Asia/Taipei',
+              'symbols': prices
+          }
+
+          with open('prices.json', 'w', encoding='utf-8') as f:
+              json.dump(output, f, ensure_ascii=False, indent=2)
+              f.write('\n')
+
+          print(json.dumps(output, ensure_ascii=False, indent=2))
+          PY
+
+      - name: Commit updated prices
+        run: |
+          if git diff --quiet prices.json; then
+            echo "prices.json unchanged"
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add prices.json
+          git commit -m "Update ETF prices"
+          git push
