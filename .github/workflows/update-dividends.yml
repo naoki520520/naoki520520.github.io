@@ -94,7 +94,12 @@ jobs:
 
           def load_json_url(url):
               text = fetch_text(url)
-              return json.loads(text)
+              try:
+                  return json.loads(text)
+              except Exception:
+                  print("JSON parse failed. Response head:")
+                  print(text[:800])
+                  raise
 
           def fetch_0056():
               url = "https://api.yuantafunds.com/ecTransation/api/trans?APIType=EC2API&AppName=FundWeb&PageName=%2Fmyfund%2Fdividend%2Fhistory&Device=4&DeviceId=0830bcf7-7f26-4e74-8d36-896aa878a292&FuncId=app%2FGetPopularFund&isApp=false"
@@ -210,78 +215,7 @@ jobs:
 
           def fetch_00919():
               raise RuntimeError("00919 official parser disabled until field mapping is verified")
-              url = "https://www.capitalfund.com.tw/etf/product/detail/195/interest"
-              html = fetch_text(url)
 
-              # 群益頁面 HTML 內含足夠資訊。此解析器先抓「日期 + 金額」型態，再用日期序列推估。
-              text = re.sub(r"<script[\s\S]*?</script>", " ", html, flags=re.I)
-              text = re.sub(r"<style[\s\S]*?</style>", " ", text, flags=re.I)
-              text = re.sub(r"<[^>]+>", " ", text)
-              text = re.sub(r"&nbsp;|&#160;", " ", text)
-              text = re.sub(r"\s+", " ", text)
-
-              date_matches = re.findall(r"20\d{2}/\d{1,2}/\d{1,2}", text)
-              amount_matches = re.findall(r"\b\d+\.\d{2,3}\b", text)
-
-              # 優先抓 00919 常見配息金額，避免抓到報酬率等百分比數字。
-              candidate_amounts = [
-                  float(x) for x in amount_matches
-                  if 0 < float(x) < 5
-              ]
-
-              # 針對群益目前頁面，常見順序會出現：公告日、基準日、除息日、發放日。
-              dates = []
-              for d in date_matches:
-                  iso = to_iso_date(d)
-                  if iso and iso not in dates:
-                      dates.append(iso)
-
-              records = []
-              # 掃描文字片段，嘗試擷取「分配金額 ... 日期日期日期日期」
-              windows = re.split(r"00919|群益台灣精選高息|收益分配|分配金額", text)
-              for w in windows:
-                  ds = [to_iso_date(x) for x in re.findall(r"20\d{2}/\d{1,2}/\d{1,2}", w)]
-                  ds = [x for x in ds if x]
-                  nums = [to_float(x) for x in re.findall(r"\b\d+\.\d{2,3}\b", w)]
-                  nums = [x for x in nums if x and 0 < x < 5]
-
-                  if len(ds) >= 4 and nums:
-                      amount = nums[0]
-                      ex = ds[2]
-                      pay = ds[3]
-                      records.append({
-                          "q": q_from_date(ex),
-                          "v": amount,
-                          "exDate": ex,
-                          "payDate": pay,
-                          "source": "Capital official page"
-                      })
-
-              # 若上面抓不到，使用目前已知的 HTML 順序備援。這不是人工表格，而是從頁面日期/金額陣列推斷。
-              if not records and len(dates) >= 4 and candidate_amounts:
-                  for i in range(0, min(len(dates) - 3, len(candidate_amounts) * 4), 4):
-                      amount = candidate_amounts[i // 4]
-                      ex = dates[i + 2]
-                      pay = dates[i + 3]
-                      records.append({
-                          "q": q_from_date(ex),
-                          "v": amount,
-                          "exDate": ex,
-                          "payDate": pay,
-                          "source": "Capital official page inferred"
-                      })
-
-              selected = sort_latest_paid(records)
-              if not selected:
-                  raise RuntimeError("00919 no dividend records parsed")
-
-              return {
-                  "name": "群益台灣精選高息",
-                  "currentDividend": selected[0]["v"],
-                  "history": selected,
-                  "source": "Capital official page",
-                  "policy": "latest four paid records by payDate"
-              }
 
           fetchers = {
               "0056": fetch_0056,
