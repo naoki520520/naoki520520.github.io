@@ -1,0 +1,68 @@
+name: Test ETF Dividend Sources
+
+on:
+  workflow_dispatch:
+
+jobs:
+  test-dividend-sources:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fetch official dividend pages
+        run: |
+          python - <<'PY'
+          import re
+          import urllib.request
+
+          SOURCES = {
+              "0056_Yuanta": "https://www.yuantafunds.com/myfund/dividend/history?fundid=1084",
+              "00878_Cathay": "https://www.cathaysite.com.tw/ETF/detail/ECN?tab=etf5",
+              "00919_Capital": "https://www.capitalfund.com.tw/etf/product/detail/195/interest",
+          }
+
+          KEYWORDS = [
+              "配息", "收益分配", "除息", "發放", "每單位", "分配金額",
+              "0056", "00878", "00919"
+          ]
+
+          headers = {
+              "User-Agent": "Mozilla/5.0",
+              "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+              "Accept-Language": "zh-TW,zh;q=0.9,en;q=0.8",
+          }
+
+          for name, url in SOURCES.items():
+              print("=" * 80)
+              print(name)
+              print(url)
+
+              try:
+                  req = urllib.request.Request(url, headers=headers)
+                  with urllib.request.urlopen(req, timeout=25) as res:
+                      raw = res.read()
+
+                  text = raw.decode("utf-8", errors="ignore")
+                  compact = re.sub(r"\s+", " ", text)
+
+                  print("status: OK")
+                  print("bytes:", len(raw))
+                  print("chars:", len(text))
+
+                  found = [k for k in KEYWORDS if k in text]
+                  print("keywords_found:", found)
+
+                  for k in KEYWORDS:
+                      idx = compact.find(k)
+                      if idx >= 0:
+                          start = max(0, idx - 180)
+                          end = min(len(compact), idx + 500)
+                          print(f"--- snippet around {k} ---")
+                          print(compact[start:end])
+                          break
+
+                  if not found:
+                      print("warning: no dividend-related keywords found. Data may be loaded by JavaScript/API.")
+
+              except Exception as e:
+                  print("status: ERROR")
+                  print(type(e).__name__, str(e))
+          PY
