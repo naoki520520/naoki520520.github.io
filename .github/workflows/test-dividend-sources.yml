@@ -7,10 +7,11 @@ jobs:
   test-dividend-sources:
     runs-on: ubuntu-latest
     steps:
-      - name: Fetch official dividend pages
+      - name: Search API clues in official pages
         run: |
           python - <<'PY'
           import re
+          import urllib.parse
           import urllib.request
 
           SOURCES = {
@@ -19,17 +20,10 @@ jobs:
               "00919_Capital": "https://www.capitalfund.com.tw/etf/product/detail/195/interest",
           }
 
-          SEARCH_TERMS = [
-              "除息日",
-              "發放日",
-              "收益分配",
-              "配息",
-              "每單位",
-              "分配金額",
-              "現金股利",
-              "配息金額",
-              "評價日",
-              "收益分配基準日",
+          CLUE_WORDS = [
+              "api", "ajax", "json", "dividend", "Dividend", "fundid", "FundId",
+              "配息", "收益分配", "除息", "發放", "interest", "distribution",
+              "ECN", "1084", "195"
           ]
 
           headers = {
@@ -38,14 +32,20 @@ jobs:
               "Accept-Language": "zh-TW,zh;q=0.9,en;q=0.8",
           }
 
-          def strip_tags(s):
-              s = re.sub(r"<script[\s\S]*?</script>", " ", s, flags=re.I)
-              s = re.sub(r"<style[\s\S]*?</style>", " ", s, flags=re.I)
-              s = re.sub(r"<[^>]+>", " ", s)
-              s = re.sub(r"&nbsp;|&#160;", " ", s)
-              s = re.sub(r"&amp;", "&", s)
-              s = re.sub(r"\s+", " ", s)
-              return s.strip()
+          def fetch(url):
+              req = urllib.request.Request(url, headers=headers)
+              with urllib.request.urlopen(req, timeout=25) as res:
+                  raw = res.read()
+              return raw.decode("utf-8", errors="ignore")
+
+          def unique(seq):
+              seen = set()
+              out = []
+              for x in seq:
+                  if x not in seen:
+                      seen.add(x)
+                      out.append(x)
+              return out
 
           for name, url in SOURCES.items():
               print("=" * 100)
@@ -53,39 +53,58 @@ jobs:
               print(url)
 
               try:
-                  req = urllib.request.Request(url, headers=headers)
-                  with urllib.request.urlopen(req, timeout=25) as res:
-                      raw = res.read()
-
-                  html = raw.decode("utf-8", errors="ignore")
-                  text = strip_tags(html)
+                  html = fetch(url)
+                  base = url
 
                   print("status: OK")
-                  print("bytes:", len(raw))
-                  print("text_chars:", len(text))
+                  print("html_chars:", len(html))
 
-                  found = [term for term in SEARCH_TERMS if term in text]
-                  print("terms_found:", found)
+                  print("\n--- script src candidates ---")
+                  scripts = re.findall(r'<script[^>]+src=["\']([^"\']+)["\']', html, flags=re.I)
+                  scripts = [urllib.parse.urljoin(base, s) for s in scripts]
+                  for s in unique(scripts)[:80]:
+                      print(s)
 
-                  for term in SEARCH_TERMS:
-                      idx = text.find(term)
+                  print("\n--- href candidates containing clues ---")
+                  hrefs = re.findall(r'href=["\']([^"\']+)["\']', html, flags=re.I)
+                  hrefs = [urllib.parse.urljoin(base, h) for h in hrefs]
+                  clue_hrefs = [
+                      h for h in unique(hrefs)
+                      if any(word.lower() in h.lower() for word in CLUE_WORDS)
+                  ]
+                  for h in clue_hrefs[:80]:
+                      print(h)
+
+                  print("\n--- url-like strings containing clues ---")
+                  url_strings = re.findall(r'["\']([^"\']*(?:api|ajax|json|dividend|interest|distribution|fundid|FundId|ECN|1084|195)[^"\']*)["\']', html, flags=re.I)
+                  for u in unique(url_strings)[:120]:
+                      print(urllib.parse.urljoin(base, u))
+
+                  print("\n--- text snippets around clue words ---")
+                  compact = re.sub(r"\s+", " ", html)
+                  for word in CLUE_WORDS:
+                      idx = compact.lower().find(word.lower())
                       if idx >= 0:
-                          print(f"\n--- text snippet around [{term}] ---")
-                          start = max(0, idx - 600)
-                          end = min(len(text), idx + 1600)
-                          print(text[start:end])
+                          print(f"\n[{word}]")
+                          print(compact[max(0, idx-500):idx+1200])
 
-                  print("\n--- date-like samples ---")
-                  samples = re.findall(r"(?:20)?\d{2}[/-]\d{1,2}[/-]\d{1,2}", text)
-                  print(samples[:30])
-
-                  print("\n--- number-like samples near dividend words ---")
-                  for term in ["配息", "分配金額", "每單位", "收益分配"]:
-                      idx = text.find(term)
-                      if idx >= 0:
-                          window = text[max(0, idx - 300):min(len(text), idx + 1200)]
-                          nums = re.findall(r"\d+\.\d+|\d+", window)
-                          print(term, nums[:40])
+                  print("\n--- try selected JS files for API clues ---")
+                  for js_url in unique(scripts)[:20]:
+                      if not js_url.lower().endswith(".js"):
+                          continue
+                      try:
+                          js = fetch(js_url)
+                          if any(word.lower() in js.lower() for word in CLUE_WORDS):
+                              print("\nJS:", js_url)
+                              compact_js = re.sub(r"\s+", " ", js)
+                              for word in CLUE_WORDS:
+                                  idx = compact_js.lower().find(word.lower())
+                                  if idx >= 0:
+                                      print(f"[{word}]")
+                                      print(compact_js[max(0, idx-400):idx+1000])
+                                      break
+                      except Exception as e:
+                          print("JS fetch error:", js_url, type(e).__name__, str(e))
 
               except Exception as e:
                   print("status: ERROR")
