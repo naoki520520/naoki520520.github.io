@@ -114,6 +114,29 @@
     overflow: hidden;
   }
   .card::before { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: var(--accent); }
+  .card::after {
+  content: "";
+  position: absolute;
+  top: -45%;
+  left: -90%;
+  width: 58%;
+  height: 190%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255,255,255,0.16),
+    transparent
+  );
+  transform: rotate(18deg);
+  animation: cardShine 5.5s infinite;
+  pointer-events: none;
+}
+
+@keyframes cardShine {
+  0% { left: -90%; }
+  42% { left: 135%; }
+  100% { left: 135%; }
+}
   .c-0056 { --accent: var(--accent-pink); --glow-rgb: 255, 79, 216; }
   .c-00878 { --accent: var(--accent-cyan); --glow-rgb: 0, 229, 255; }
   .c-00919 { --accent: var(--accent-purple); --glow-rgb: 153, 69, 255; }
