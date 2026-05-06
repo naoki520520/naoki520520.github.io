@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-05-06T15:26:09+08:00",
+  "updatedAt": "2026-05-06T16:44:54+08:00",
   "timezone": "Asia/Taipei",
   "symbols": {
     "0056": {
@@ -31,71 +31,58 @@
           "payDate": "2025-02-18"
         }
       ],
-      "source": "workflow dividend table",
+      "source": "fallback old dividends.json after official fetch failed: JSONDecodeError",
       "policy": "latest four paid records by payDate"
     },
     "00878": {
       "name": "國泰永續高股息",
-      "currentDividend": 0.4,
+      "currentDividend": 0.42,
       "history": [
+        {
+          "q": "26Q1",
+          "v": 0.42,
+          "exDate": "2026-02-26",
+          "payDate": "2026-03-23",
+          "source": "Cathay official API"
+        },
         {
           "q": "25Q4",
           "v": 0.4,
           "exDate": "2025-11-18",
-          "payDate": "2025-12-15"
+          "payDate": "2025-12-12",
+          "source": "Cathay official API"
         },
         {
           "q": "25Q3",
           "v": 0.4,
           "exDate": "2025-08-18",
-          "payDate": "2025-09-12"
+          "payDate": "2025-09-11",
+          "source": "Cathay official API"
         },
         {
           "q": "25Q2",
           "v": 0.47,
-          "exDate": "2025-05-16",
-          "payDate": "2025-06-13"
-        },
-        {
-          "q": "25Q1",
-          "v": 0.5,
-          "exDate": "2025-02-18",
-          "payDate": "2025-03-14"
+          "exDate": "2025-05-19",
+          "payDate": "2025-06-13",
+          "source": "Cathay official API"
         }
       ],
-      "source": "workflow dividend table",
+      "source": "Cathay official API",
       "policy": "latest four paid records by payDate"
     },
     "00919": {
       "name": "群益台灣精選高息",
-      "currentDividend": 0.54,
+      "currentDividend": 2.96,
       "history": [
         {
-          "q": "25Q4",
-          "v": 0.54,
-          "exDate": "2025-12-16",
-          "payDate": "2026-01-13"
-        },
-        {
-          "q": "25Q3",
-          "v": 0.54,
-          "exDate": "2025-09-16",
-          "payDate": "2025-10-15"
-        },
-        {
-          "q": "25Q2",
-          "v": 0.72,
-          "exDate": "2025-06-17",
-          "payDate": "2025-07-14"
-        },
-        {
-          "q": "25Q1",
-          "v": 0.72,
-          "exDate": "2025-03-18",
-          "payDate": "2025-04-14"
+          "q": "26Q1",
+          "v": 2.96,
+          "exDate": "2026-02-28",
+          "payDate": "2026-03-16",
+          "source": "Capital official page"
         }
       ],
-      "source": "workflow dividend table",
+      "source": "Capital official page",
       "policy": "latest four paid records by payDate"
     }
   }
