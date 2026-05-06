@@ -48,6 +48,7 @@ jobs:
                   "source": "manual safe fallback",
                   "policy": "latest four paid records by payDate"
               },
+          }
 
           try:
               with open("dividends.json", "r", encoding="utf-8") as f:
