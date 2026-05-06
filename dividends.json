@@ -1,0 +1,84 @@
+{
+  "updatedAt": "2026-05-06T15:18:35+08:00",
+  "timezone": "Asia/Taipei",
+  "symbols": {
+    "0056": {
+      "name": "元大高股息",
+      "currentDividend": 0.87,
+      "history": [
+        {
+          "q": "25Q4",
+          "v": 0.87,
+          "exDate": "2025-10-22",
+          "payDate": "2025-11-14"
+        },
+        {
+          "q": "25Q3",
+          "v": 0.87,
+          "exDate": "2025-07-16",
+          "payDate": "2025-08-08"
+        },
+        {
+          "q": "25Q2",
+          "v": 0.87,
+          "exDate": "2025-04-18",
+          "payDate": "2025-05-13"
+        }
+      ],
+      "source": "workflow dividend table",
+      "policy": "latest four records whose payDate has passed; fallback to announced records if none are paid yet"
+    },
+    "00878": {
+      "name": "國泰永續高股息",
+      "currentDividend": 0.4,
+      "history": [
+        {
+          "q": "25Q4",
+          "v": 0.4,
+          "exDate": "2025-11-18",
+          "payDate": "2025-12-15"
+        },
+        {
+          "q": "25Q3",
+          "v": 0.4,
+          "exDate": "2025-08-18",
+          "payDate": "2025-09-12"
+        },
+        {
+          "q": "25Q2",
+          "v": 0.47,
+          "exDate": "2025-05-16",
+          "payDate": "2025-06-13"
+        }
+      ],
+      "source": "workflow dividend table",
+      "policy": "latest four records whose payDate has passed; fallback to announced records if none are paid yet"
+    },
+    "00919": {
+      "name": "群益台灣精選高息",
+      "currentDividend": 0.54,
+      "history": [
+        {
+          "q": "25Q4",
+          "v": 0.54,
+          "exDate": "2025-12-16",
+          "payDate": "2026-01-13"
+        },
+        {
+          "q": "25Q3",
+          "v": 0.54,
+          "exDate": "2025-09-16",
+          "payDate": "2025-10-15"
+        },
+        {
+          "q": "25Q2",
+          "v": 0.72,
+          "exDate": "2025-06-17",
+          "payDate": "2025-07-14"
+        }
+      ],
+      "source": "workflow dividend table",
+      "policy": "latest four records whose payDate has passed; fallback to announced records if none are paid yet"
+    }
+  }
+}
