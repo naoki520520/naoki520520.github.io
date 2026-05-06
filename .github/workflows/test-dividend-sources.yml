@@ -7,104 +7,94 @@ jobs:
   test-dividend-sources:
     runs-on: ubuntu-latest
     steps:
-      - name: Search API clues in official pages
+      - name: Test candidate dividend endpoints
         run: |
           python - <<'PY'
+          import json
           import re
-          import urllib.parse
           import urllib.request
 
-          SOURCES = {
-              "0056_Yuanta": "https://www.yuantafunds.com/myfund/dividend/history?fundid=1084",
-              "00878_Cathay": "https://www.cathaysite.com.tw/ETF/detail/ECN?tab=etf5",
-              "00919_Capital": "https://www.capitalfund.com.tw/etf/product/detail/195/interest",
+          URLS = {
+              "0056_yuanta_history": "https://www.yuantafunds.com/myfund/dividend/history?fundid=1084",
+              "0056_yuanta_calendar": "https://www.yuantafunds.com/myfund/dividend/calendar",
+              "0056_yuanta_adjust": "https://www.yuantafunds.com/myfund/dividend/adjust-info",
+
+              "00878_cathay_detail": "https://www.cathaysite.com.tw/ETF/detail/ECN?tab=etf5",
+              "00878_cathay_dividend_income": "https://www.cathaysite.com.tw/ETF/dividend-income",
+              "00878_cathay_product_dividend": "https://www.cathaysite.com.tw/ETF/product?tab=dividend",
+              "00878_cathay_application_json": "https://www.cathaysite.com.tw/ETF/detail/application/json",
+
+              "00919_capital_interest": "https://www.capitalfund.com.tw/etf/product/detail/195/interest",
+              "00919_capital_product_interest": "https://www.capitalfund.com.tw/etf/product/interest",
+              "00919_capital_etfdividend": "https://www.capitalfund.com.tw/etfdividend",
           }
 
-          CLUE_WORDS = [
-              "api", "ajax", "json", "dividend", "Dividend", "fundid", "FundId",
-              "配息", "收益分配", "除息", "發放", "interest", "distribution",
-              "ECN", "1084", "195"
-          ]
-
-          headers = {
+          HEADERS = {
               "User-Agent": "Mozilla/5.0",
-              "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+              "Accept": "text/html,application/json,text/plain,*/*",
               "Accept-Language": "zh-TW,zh;q=0.9,en;q=0.8",
           }
 
+          KEYWORDS = [
+              "0056", "00878", "00919",
+              "除息", "發放", "收益分配", "配息", "每單位", "分配金額",
+              "dividend", "Dividend", "interest", "distribution"
+          ]
+
           def fetch(url):
-              req = urllib.request.Request(url, headers=headers)
+              req = urllib.request.Request(url, headers=HEADERS)
               with urllib.request.urlopen(req, timeout=25) as res:
+                  content_type = res.headers.get("content-type", "")
                   raw = res.read()
-              return raw.decode("utf-8", errors="ignore")
+              text = raw.decode("utf-8", errors="ignore")
+              return content_type, raw, text
 
-          def unique(seq):
-              seen = set()
-              out = []
-              for x in seq:
-                  if x not in seen:
-                      seen.add(x)
-                      out.append(x)
-              return out
+          def strip_tags(s):
+              s = re.sub(r"<script[\s\S]*?</script>", " ", s, flags=re.I)
+              s = re.sub(r"<style[\s\S]*?</style>", " ", s, flags=re.I)
+              s = re.sub(r"<[^>]+>", " ", s)
+              s = re.sub(r"\s+", " ", s)
+              return s.strip()
 
-          for name, url in SOURCES.items():
+          for name, url in URLS.items():
               print("=" * 100)
               print(name)
               print(url)
 
               try:
-                  html = fetch(url)
-                  base = url
+                  content_type, raw, text = fetch(url)
+                  visible = strip_tags(text)
+                  compact = re.sub(r"\s+", " ", text)
 
                   print("status: OK")
-                  print("html_chars:", len(html))
+                  print("content_type:", content_type)
+                  print("bytes:", len(raw))
+                  print("text_chars:", len(text))
+                  print("visible_chars:", len(visible))
 
-                  print("\n--- script src candidates ---")
-                  scripts = re.findall(r'<script[^>]+src=["\']([^"\']+)["\']', html, flags=re.I)
-                  scripts = [urllib.parse.urljoin(base, s) for s in scripts]
-                  for s in unique(scripts)[:80]:
-                      print(s)
+                  found = [k for k in KEYWORDS if k.lower() in text.lower()]
+                  print("keywords_found:", found)
 
-                  print("\n--- href candidates containing clues ---")
-                  hrefs = re.findall(r'href=["\']([^"\']+)["\']', html, flags=re.I)
-                  hrefs = [urllib.parse.urljoin(base, h) for h in hrefs]
-                  clue_hrefs = [
-                      h for h in unique(hrefs)
-                      if any(word.lower() in h.lower() for word in CLUE_WORDS)
-                  ]
-                  for h in clue_hrefs[:80]:
-                      print(h)
+                  date_samples = re.findall(r"(?:20)?\d{2}[/-]\d{1,2}[/-]\d{1,2}", visible)
+                  print("date_samples:", date_samples[:30])
 
-                  print("\n--- url-like strings containing clues ---")
-                  url_strings = re.findall(r'["\']([^"\']*(?:api|ajax|json|dividend|interest|distribution|fundid|FundId|ECN|1084|195)[^"\']*)["\']', html, flags=re.I)
-                  for u in unique(url_strings)[:120]:
-                      print(urllib.parse.urljoin(base, u))
+                  if "json" in content_type.lower() or text.strip().startswith(("{", "[")):
+                      print("--- json/text head ---")
+                      print(text[:2500])
+                  else:
+                      for k in KEYWORDS:
+                          idx = visible.lower().find(k.lower())
+                          if idx >= 0:
+                              print(f"--- visible snippet around {k} ---")
+                              print(visible[max(0, idx-500):idx+1800])
+                              break
 
-                  print("\n--- text snippets around clue words ---")
-                  compact = re.sub(r"\s+", " ", html)
-                  for word in CLUE_WORDS:
-                      idx = compact.lower().find(word.lower())
-                      if idx >= 0:
-                          print(f"\n[{word}]")
-                          print(compact[max(0, idx-500):idx+1200])
-
-                  print("\n--- try selected JS files for API clues ---")
-                  for js_url in unique(scripts)[:20]:
-                      if not js_url.lower().endswith(".js"):
-                          continue
-                      try:
-                          js = fetch(js_url)
-                          if any(word.lower() in js.lower() for word in CLUE_WORDS):
-                              print("\nJS:", js_url)
-                              compact_js = re.sub(r"\s+", " ", js)
-                              for word in CLUE_WORDS:
-                                  idx = compact_js.lower().find(word.lower())
-                                  if idx >= 0:
-                                      print(f"[{word}]")
-                                      print(compact_js[max(0, idx-400):idx+1000])
-                                      break
-                      except Exception as e:
-                          print("JS fetch error:", js_url, type(e).__name__, str(e))
+                      print("--- raw clue snippets ---")
+                      for k in ["__NUXT__", "__NEXT_DATA__", "window.", "api", "json", "dividend", "收益分配", "除息日", "發放日"]:
+                          idx = compact.lower().find(k.lower())
+                          if idx >= 0:
+                              print(f"[{k}]")
+                              print(compact[max(0, idx-400):idx+1200])
 
               except Exception as e:
                   print("status: ERROR")
