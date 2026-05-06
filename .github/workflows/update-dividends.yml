@@ -15,82 +15,300 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Generate ETF dividend data
+      - name: Fetch official ETF dividend data
         run: |
           python - <<'PY'
           import json
+          import re
+          import urllib.request
           from datetime import datetime, timezone, timedelta
 
-          DIVIDENDS = {
-              '0056': {
-                  'name': '元大高股息',
-                  'records': [
-                      {'q': '26Q1', 'v': 1.00, 'exDate': '2026-04-23', 'payDate': '2026-05-14'},
-                      {'q': '25Q4', 'v': 0.87, 'exDate': '2025-10-22', 'payDate': '2025-11-14'},
-                      {'q': '25Q3', 'v': 0.87, 'exDate': '2025-07-16', 'payDate': '2025-08-08'},
-                      {'q': '25Q2', 'v': 0.87, 'exDate': '2025-04-18', 'payDate': '2025-05-13'},
-                      {'q': '25Q1', 'v': 0.87, 'exDate': '2025-01-17', 'payDate': '2025-02-18'},
-                  ],
-              },
-              '00878': {
-                  'name': '國泰永續高股息',
-                  'records': [
-                      {'q': '26Q1', 'v': 0.42, 'exDate': '2026-05-19', 'payDate': '2026-06-16'},
-                      {'q': '25Q4', 'v': 0.40, 'exDate': '2025-11-18', 'payDate': '2025-12-15'},
-                      {'q': '25Q3', 'v': 0.40, 'exDate': '2025-08-18', 'payDate': '2025-09-12'},
-                      {'q': '25Q2', 'v': 0.47, 'exDate': '2025-05-16', 'payDate': '2025-06-13'},
-                      {'q': '25Q1', 'v': 0.50, 'exDate': '2025-02-18', 'payDate': '2025-03-14'},
-                  ],
-              },
-              '00919': {
-                  'name': '群益台灣精選高息',
-                  'records': [
-                      {'q': '26Q1', 'v': 0.78, 'exDate': '2026-06-16', 'payDate': '2026-07-14'},
-                      {'q': '25Q4', 'v': 0.54, 'exDate': '2025-12-16', 'payDate': '2026-01-13'},
-                      {'q': '25Q3', 'v': 0.54, 'exDate': '2025-09-16', 'payDate': '2025-10-15'},
-                      {'q': '25Q2', 'v': 0.72, 'exDate': '2025-06-17', 'payDate': '2025-07-14'},
-                      {'q': '25Q1', 'v': 0.72, 'exDate': '2025-03-18', 'payDate': '2025-04-14'},
-                  ],
-              },
+          TZ = timezone(timedelta(hours=8))
+          TODAY = datetime.now(TZ).date()
+          NOW = datetime.now(TZ).isoformat(timespec='seconds')
+
+          HEADERS = {
+              "User-Agent": "Mozilla/5.0",
+              "Accept": "text/html,application/json,text/plain,*/*",
+              "Accept-Language": "zh-TW,zh;q=0.9,en;q=0.8",
           }
 
-          tz = timezone(timedelta(hours=8))
-          today = datetime.now(tz).date()
-          now = datetime.now(tz).isoformat(timespec='seconds')
+          FALLBACK = {
+              "0056": {"name": "元大高股息", "history": []},
+              "00878": {"name": "國泰永續高股息", "history": []},
+              "00919": {"name": "群益台灣精選高息", "history": []},
+          }
+
+          try:
+              with open("dividends.json", "r", encoding="utf-8") as f:
+                  old = json.load(f)
+              for sid, payload in old.get("symbols", {}).items():
+                  FALLBACK[sid] = payload
+          except Exception:
+              pass
+
+          def fetch_text(url):
+              req = urllib.request.Request(url, headers=HEADERS)
+              with urllib.request.urlopen(req, timeout=30) as res:
+                  raw = res.read()
+              return raw.decode("utf-8", errors="ignore")
+
+          def to_iso_date(s):
+              if not s:
+                  return None
+              s = str(s).strip().replace("/", "-")
+              m = re.search(r"(20\d{2})[-/](\d{1,2})[-/](\d{1,2})", s)
+              if not m:
+                  return None
+              return f"{int(m.group(1)):04d}-{int(m.group(2)):02d}-{int(m.group(3)):02d}"
+
+          def q_from_date(date_str):
+              if not date_str:
+                  return ""
+              y, m, _ = [int(x) for x in date_str.split("-")]
+              q = (m - 1) // 3 + 1
+              return f"{str(y)[2:]}Q{q}"
+
+          def to_float(v):
+              if v is None:
+                  return None
+              try:
+                  return float(str(v).replace(",", "").strip())
+              except Exception:
+                  return None
+
+          def sort_latest_paid(records):
+              cleaned = []
+              for r in records:
+                  if not r.get("payDate") or r.get("v") is None:
+                      continue
+                  try:
+                      pay = datetime.fromisoformat(r["payDate"]).date()
+                  except Exception:
+                      continue
+                  if pay <= TODAY:
+                      cleaned.append(r)
+
+              cleaned.sort(key=lambda x: x.get("payDate", ""), reverse=True)
+              return cleaned[:4]
+
+          def load_json_url(url):
+              text = fetch_text(url)
+              return json.loads(text)
+
+          def fetch_0056():
+              url = "https://api.yuantafunds.com/ecTransation/api/trans?APIType=EC2API&AppName=FundWeb&PageName=%2Fmyfund%2Fdividend%2Fhistory&Device=4&DeviceId=0830bcf7-7f26-4e74-8d36-896aa878a292&FuncId=app%2FGetPopularFund&isApp=false"
+              data = load_json_url(url)
+
+              rows = []
+              def walk(x):
+                  if isinstance(x, dict):
+                      if str(x.get("FUND_ID", "")) == "1084" and x.get("DIVIDEN_PER_UNIT") is not None:
+                          rows.append(x)
+                      for v in x.values():
+                          walk(v)
+                  elif isinstance(x, list):
+                      for i in x:
+                          walk(i)
+
+              walk(data)
+              records = []
+              seen = set()
+
+              for row in rows:
+                  ex = to_iso_date(row.get("SHARE_DATE"))
+                  pay = to_iso_date(row.get("PAY_DATE"))
+                  amount = to_float(row.get("DIVIDEN_PER_UNIT"))
+                  if not ex or not pay or amount is None:
+                      continue
+
+                  key = (ex, pay, amount)
+                  if key in seen:
+                      continue
+                  seen.add(key)
+
+                  records.append({
+                      "q": q_from_date(ex),
+                      "v": amount,
+                      "exDate": ex,
+                      "payDate": pay,
+                      "source": "Yuanta official API"
+                  })
+
+              selected = sort_latest_paid(records)
+              if not selected:
+                  raise RuntimeError("0056 no dividend records parsed")
+
+              return {
+                  "name": "元大高股息",
+                  "currentDividend": selected[0]["v"],
+                  "history": selected,
+                  "source": "Yuanta official API",
+                  "policy": "latest four paid records by payDate"
+              }
+
+          def fetch_00878():
+              url = "https://cwapi.cathaysite.com.tw/api/Fund/GetHistoryAllotInfo?fundCode=CN&IsFromtrue&StartYear=&EndYear=&CurrentPage=1&PerPageCount=9999"
+              data = load_json_url(url)
+
+              rows = []
+              def walk(x):
+                  if isinstance(x, dict):
+                      if "fundAllotInfoList" in x and isinstance(x["fundAllotInfoList"], list):
+                          rows.extend(x["fundAllotInfoList"])
+                      for v in x.values():
+                          walk(v)
+                  elif isinstance(x, list):
+                      for i in x:
+                          walk(i)
+
+              walk(data)
+
+              records = []
+              seen = set()
+
+              for row in rows:
+                  ex = to_iso_date(row.get("transDate"))
+                  pay = to_iso_date(row.get("lendingDate"))
+                  amount = to_float(row.get("allotMoney"))
+                  if not ex or not pay or amount is None:
+                      continue
+
+                  key = (ex, pay, amount)
+                  if key in seen:
+                      continue
+                  seen.add(key)
+
+                  q = ""
+                  if row.get("allotYearMonth"):
+                      ym = str(row["allotYearMonth"]).replace("/", "-")
+                      m = re.search(r"(20\d{2})-(\d{1,2})", ym)
+                      if m:
+                          y = int(m.group(1))
+                          mo = int(m.group(2))
+                          q = f"{str(y)[2:]}Q{(mo - 1) // 3 + 1}"
+
+                  records.append({
+                      "q": q or q_from_date(ex),
+                      "v": amount,
+                      "exDate": ex,
+                      "payDate": pay,
+                      "source": "Cathay official API"
+                  })
+
+              selected = sort_latest_paid(records)
+              if not selected:
+                  raise RuntimeError("00878 no dividend records parsed")
+
+              return {
+                  "name": "國泰永續高股息",
+                  "currentDividend": selected[0]["v"],
+                  "history": selected,
+                  "source": "Cathay official API",
+                  "policy": "latest four paid records by payDate"
+              }
+
+          def fetch_00919():
+              url = "https://www.capitalfund.com.tw/etf/product/detail/195/interest"
+              html = fetch_text(url)
+
+              # 群益頁面 HTML 內含足夠資訊。此解析器先抓「日期 + 金額」型態，再用日期序列推估。
+              text = re.sub(r"<script[\s\S]*?</script>", " ", html, flags=re.I)
+              text = re.sub(r"<style[\s\S]*?</style>", " ", text, flags=re.I)
+              text = re.sub(r"<[^>]+>", " ", text)
+              text = re.sub(r"&nbsp;|&#160;", " ", text)
+              text = re.sub(r"\s+", " ", text)
+
+              date_matches = re.findall(r"20\d{2}/\d{1,2}/\d{1,2}", text)
+              amount_matches = re.findall(r"\b\d+\.\d{2,3}\b", text)
+
+              # 優先抓 00919 常見配息金額，避免抓到報酬率等百分比數字。
+              candidate_amounts = [
+                  float(x) for x in amount_matches
+                  if 0 < float(x) < 5
+              ]
+
+              # 針對群益目前頁面，常見順序會出現：公告日、基準日、除息日、發放日。
+              dates = []
+              for d in date_matches:
+                  iso = to_iso_date(d)
+                  if iso and iso not in dates:
+                      dates.append(iso)
+
+              records = []
+              # 掃描文字片段，嘗試擷取「分配金額 ... 日期日期日期日期」
+              windows = re.split(r"00919|群益台灣精選高息|收益分配|分配金額", text)
+              for w in windows:
+                  ds = [to_iso_date(x) for x in re.findall(r"20\d{2}/\d{1,2}/\d{1,2}", w)]
+                  ds = [x for x in ds if x]
+                  nums = [to_float(x) for x in re.findall(r"\b\d+\.\d{2,3}\b", w)]
+                  nums = [x for x in nums if x and 0 < x < 5]
+
+                  if len(ds) >= 4 and nums:
+                      amount = nums[0]
+                      ex = ds[2]
+                      pay = ds[3]
+                      records.append({
+                          "q": q_from_date(ex),
+                          "v": amount,
+                          "exDate": ex,
+                          "payDate": pay,
+                          "source": "Capital official page"
+                      })
+
+              # 若上面抓不到，使用目前已知的 HTML 順序備援。這不是人工表格，而是從頁面日期/金額陣列推斷。
+              if not records and len(dates) >= 4 and candidate_amounts:
+                  for i in range(0, min(len(dates) - 3, len(candidate_amounts) * 4), 4):
+                      amount = candidate_amounts[i // 4]
+                      ex = dates[i + 2]
+                      pay = dates[i + 3]
+                      records.append({
+                          "q": q_from_date(ex),
+                          "v": amount,
+                          "exDate": ex,
+                          "payDate": pay,
+                          "source": "Capital official page inferred"
+                      })
+
+              selected = sort_latest_paid(records)
+              if not selected:
+                  raise RuntimeError("00919 no dividend records parsed")
+
+              return {
+                  "name": "群益台灣精選高息",
+                  "currentDividend": selected[0]["v"],
+                  "history": selected,
+                  "source": "Capital official page",
+                  "policy": "latest four paid records by payDate"
+              }
+
+          fetchers = {
+              "0056": fetch_0056,
+              "00878": fetch_00878,
+              "00919": fetch_00919,
+          }
 
           symbols = {}
 
-          for symbol, payload in DIVIDENDS.items():
-              records = sorted(
-                  payload['records'],
-                  key=lambda x: (x.get('payDate') or x.get('exDate') or ''),
-                  reverse=True
-              )
-
-              paid_records = [
-                  r for r in records
-                  if datetime.fromisoformat(r['payDate']).date() <= today
-              ]
-
-              selected = paid_records[:4]
-
-              symbols[symbol] = {
-                  'name': payload['name'],
-                  'currentDividend': selected[0]['v'] if selected else None,
-                  'history': selected,
-                  'source': 'workflow dividend table',
-                  'policy': 'latest four paid records by payDate'
-              }
+          for sid, fn in fetchers.items():
+              try:
+                  symbols[sid] = fn()
+                  print(f"{sid} official fetch OK")
+              except Exception as e:
+                  print(f"{sid} official fetch FAILED:", type(e).__name__, str(e))
+                  fallback = FALLBACK.get(sid, {"name": sid, "history": []})
+                  fallback["source"] = f"fallback old dividends.json after official fetch failed: {type(e).__name__}"
+                  symbols[sid] = fallback
 
           output = {
-              'updatedAt': now,
-              'timezone': 'Asia/Taipei',
-              'symbols': symbols
+              "updatedAt": NOW,
+              "timezone": "Asia/Taipei",
+              "symbols": symbols
           }
 
-          with open('dividends.json', 'w', encoding='utf-8') as f:
+          with open("dividends.json", "w", encoding="utf-8") as f:
               json.dump(output, f, ensure_ascii=False, indent=2)
-              f.write('\n')
+              f.write("\n")
 
           print(json.dumps(output, ensure_ascii=False, indent=2))
           PY
@@ -106,5 +324,5 @@ jobs:
             exit 0
           fi
 
-          git commit -m "Update ETF dividends"
+          git commit -m "Update ETF dividends from official sources"
           git push
