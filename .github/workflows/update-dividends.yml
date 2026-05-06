@@ -209,6 +209,7 @@ jobs:
               }
 
           def fetch_00919():
+              raise RuntimeError("00919 official parser disabled until field mapping is verified")
               url = "https://www.capitalfund.com.tw/etf/product/detail/195/interest"
               html = fetch_text(url)
 
