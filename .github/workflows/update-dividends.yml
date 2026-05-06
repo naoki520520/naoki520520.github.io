@@ -1,0 +1,109 @@
+name: Update ETF Dividends
+
+on:
+  schedule:
+    # 每天台灣時間 15:30 更新一次；GitHub Actions 使用 UTC
+    - cron: '30 7 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  update-dividends:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Generate ETF dividend data
+        run: |
+          python - <<'PY'
+          import json
+          from datetime import datetime, timezone, timedelta
+
+          DIVIDENDS = {
+              '0056': {
+                  'name': '元大高股息',
+                  'records': [
+                      {'q': '26Q1', 'v': 1.00, 'exDate': '2026-04-23', 'payDate': '2026-05-14'},
+                      {'q': '25Q4', 'v': 0.87, 'exDate': '2025-10-22', 'payDate': '2025-11-14'},
+                      {'q': '25Q3', 'v': 0.87, 'exDate': '2025-07-16', 'payDate': '2025-08-08'},
+                      {'q': '25Q2', 'v': 0.87, 'exDate': '2025-04-18', 'payDate': '2025-05-13'},
+                  ],
+              },
+              '00878': {
+                  'name': '國泰永續高股息',
+                  'records': [
+                      {'q': '26Q1', 'v': 0.42, 'exDate': '2026-05-19', 'payDate': '2026-06-16'},
+                      {'q': '25Q4', 'v': 0.40, 'exDate': '2025-11-18', 'payDate': '2025-12-15'},
+                      {'q': '25Q3', 'v': 0.40, 'exDate': '2025-08-18', 'payDate': '2025-09-12'},
+                      {'q': '25Q2', 'v': 0.47, 'exDate': '2025-05-16', 'payDate': '2025-06-13'},
+                  ],
+              },
+              '00919': {
+                  'name': '群益台灣精選高息',
+                  'records': [
+                      {'q': '26Q1', 'v': 0.78, 'exDate': '2026-06-16', 'payDate': '2026-07-14'},
+                      {'q': '25Q4', 'v': 0.54, 'exDate': '2025-12-16', 'payDate': '2026-01-13'},
+                      {'q': '25Q3', 'v': 0.54, 'exDate': '2025-09-16', 'payDate': '2025-10-15'},
+                      {'q': '25Q2', 'v': 0.72, 'exDate': '2025-06-17', 'payDate': '2025-07-14'},
+                  ],
+              },
+          }
+
+          tz = timezone(timedelta(hours=8))
+          today = datetime.now(tz).date()
+          now = datetime.now(tz).isoformat(timespec='seconds')
+
+          symbols = {}
+
+          for symbol, payload in DIVIDENDS.items():
+              records = sorted(
+                  payload['records'],
+                  key=lambda x: (x.get('payDate') or x.get('exDate') or ''),
+                  reverse=True
+              )
+
+              # 嚴格取「發放日已過」的最近四筆
+              paid_records = [
+                  r for r in records
+                  if datetime.fromisoformat(r['payDate']).date() <= today
+              ]
+
+              selected = paid_records[:4] if paid_records else records[:4]
+
+              symbols[symbol] = {
+                  'name': payload['name'],
+                  'currentDividend': selected[0]['v'] if selected else None,
+                  'history': selected,
+                  'source': 'workflow dividend table',
+                  'policy': 'latest four records whose payDate has passed; fallback to announced records if none are paid yet'
+              }
+
+          output = {
+              'updatedAt': now,
+              'timezone': 'Asia/Taipei',
+              'symbols': symbols
+          }
+
+          with open('dividends.json', 'w', encoding='utf-8') as f:
+              json.dump(output, f, ensure_ascii=False, indent=2)
+              f.write('\n')
+
+          print(json.dumps(output, ensure_ascii=False, indent=2))
+          PY
+
+      - name: Commit updated dividends
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add dividends.json
+
+          if git diff --cached --quiet; then
+            echo "dividends.json unchanged"
+            exit 0
+          fi
+
+          git commit -m "Update ETF dividends"
+          git push
