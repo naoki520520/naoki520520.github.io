@@ -293,6 +293,48 @@ window.updateHold = (id, val) => {
   updateCalculations();
 };
 
+async function fetchDividends() {
+  try {
+    const res = await fetch(`dividends.json?t=${Date.now()}`, {
+      cache: "no-store"
+    });
+
+    if (!res.ok) {
+      throw new Error(`dividends.json 讀取失敗：${res.status}`);
+    }
+
+    const data = await res.json();
+
+    ETFS.forEach(etf => {
+      const item = data.symbols && data.symbols[etf.id];
+      if (!item) return;
+
+      if (item.currentDividend) {
+        etf.div = parseFloat(item.currentDividend);
+      }
+
+      if (Array.isArray(item.history) && item.history.length) {
+        etf.history = item.history.slice(0, 4).map(x => ({
+          q: x.q,
+          v: parseFloat(x.v),
+          exDate: x.exDate,
+          payDate: x.payDate
+        }));
+
+        const latest = etf.history[0];
+        if (latest.exDate) etf.ex = latest.exDate.slice(5);
+        if (latest.payDate) etf.pay = latest.payDate.slice(5);
+      }
+    });
+
+    return true;
+  } catch (e) {
+    console.error(e);
+    toast("⚠️ 配息資料更新失敗，暫用預設資料");
+    return false;
+  }
+}
+  
 async function handleRefresh() {
   const btn = document.getElementById('refreshBtn');
   btn.classList.add('loading');
@@ -360,8 +402,15 @@ window.saveIcs = (id) => {
 };
 
 document.getElementById('refreshBtn').onclick = handleRefresh;
-initialRender();
-setTimeout(handleRefresh, 1000);
+
+async function boot() {
+  await fetchDividends();
+  initialRender();
+  setTimeout(handleRefresh, 1000);
+}
+
+boot();
+  
 </script>
 </body>
 </html>
