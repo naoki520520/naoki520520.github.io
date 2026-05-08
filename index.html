@@ -285,11 +285,103 @@ overflow: hidden;
   }
 
   footer { text-align: center; font-size: 10px; color: var(--text-muted); margin-top: 35px; line-height: 1.8; }
+/* Touch Ripple：手機觸控能量波紋 */
+.card,
+.btn-refresh,
+.price-tag,
+.input-row,
+.hist-item,
+.card-estimate {
+  position: relative;
+  overflow: hidden;
+}
+
+.touch-ripple {
+  position: absolute;
+  border-radius: 999px;
+  transform: scale(0);
+  background:
+    radial-gradient(circle, rgba(255,255,255,0.75), rgba(255,255,255,0.22) 35%, transparent 68%);
+  box-shadow:
+    0 0 18px rgba(255,255,255,0.7),
+    0 0 36px rgba(var(--glow-rgb, 0, 229, 255), 0.55);
+  pointer-events: none;
+  animation: rippleBurst 0.72s ease-out forwards;
+  mix-blend-mode: screen;
+  z-index: 3;
+}
+
+@keyframes rippleBurst {
+  0% {
+    opacity: 0.95;
+    transform: scale(0);
+  }
+  70% {
+    opacity: 0.45;
+  }
+  100% {
+    opacity: 0;
+    transform: scale(3.4);
+  }
+}
+
+/* Refresh Energy Flash：刷新時全畫面能量閃光 */
+#energyFlash {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 999;
+  opacity: 0;
+  background:
+    radial-gradient(circle at 50% 35%, rgba(255,255,255,0.95), transparent 10%),
+    radial-gradient(circle at 50% 45%, rgba(0,229,255,0.55), transparent 28%),
+    radial-gradient(circle at 50% 55%, rgba(255,79,216,0.38), transparent 48%),
+    linear-gradient(135deg, rgba(255,210,111,0.22), rgba(153,69,255,0.18));
+  mix-blend-mode: screen;
+}
+
+#energyFlash.active {
+  animation: energyFlashBurst 0.9s ease-out forwards;
+}
+
+@keyframes energyFlashBurst {
+  0% {
+    opacity: 0;
+    transform: scale(0.94);
+    filter: blur(18px);
+  }
+  18% {
+    opacity: 1;
+    transform: scale(1.02);
+    filter: blur(4px);
+  }
+  42% {
+    opacity: 0.55;
+    transform: scale(1.08);
+    filter: blur(10px);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.18);
+    filter: blur(24px);
+  }
+}
+
+/* 手機效能保險 */
+@media (prefers-reduced-motion: reduce) {
+  .touch-ripple,
+  #energyFlash.active {
+    animation: none !important;
+    display: none !important;
+  }
+}
 </style>
 </head>
 <body>
 
 <div id="toast" style="position: fixed; top: 25px; left: 50%; transform: translateX(-50%); padding: 12px 28px; border-radius: 30px; font-size: 13px; z-index: 1000; display: none; backdrop-filter: blur(15px); color: #fff; box-shadow: 0 10px 40px rgba(0,0,0,0.6);"></div>
+<div id="energyFlash"></div>
+  
 
 <div class="wrap">
   <header>
@@ -508,6 +600,38 @@ function toast(msg) {
   const t = document.getElementById('toast'); t.textContent = msg; t.style.display = 'block';
   setTimeout(() => t.style.display = 'none', 2500);
 }
+
+function triggerEnergyFlash() {
+  const flash = document.getElementById("energyFlash");
+  if (!flash) return;
+
+  flash.classList.remove("active");
+  void flash.offsetWidth;
+  flash.classList.add("active");
+}
+
+function createTouchRipple(e) {
+  const target = e.target.closest(".card, .btn-refresh, .price-tag, .input-row, .hist-item, .card-estimate");
+  if (!target) return;
+
+  const rect = target.getBoundingClientRect();
+  const size = Math.max(rect.width, rect.height) * 0.9;
+  const ripple = document.createElement("span");
+
+  ripple.className = "touch-ripple";
+  ripple.style.width = `${size}px`;
+  ripple.style.height = `${size}px`;
+  ripple.style.left = `${e.clientX - rect.left - size / 2}px`;
+  ripple.style.top = `${e.clientY - rect.top - size / 2}px`;
+
+  target.appendChild(ripple);
+
+  setTimeout(() => {
+    ripple.remove();
+  }, 750);
+}
+
+document.addEventListener("pointerdown", createTouchRipple, { passive: true });
 
 window.manual = (id) => {
   const etf = ETFS.find(x=>x.id===id);
