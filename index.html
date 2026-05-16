@@ -9,8 +9,8 @@
     --bg-deep: #050016;
     --glass-bg: rgba(255, 255, 255, 0.08);
     --glass-border: rgba(255, 255, 255, 0.15);
-    --text-primary: #f5f3ff;
-    --text-muted: #a8a4c7;
+--text-primary: #f8f9f4;
+--text-muted: #b9c1b8;
     --accent-pink: #ff4fd8;
     --accent-purple: #9945ff;
     --accent-cyan: #00e5ff;
@@ -18,33 +18,62 @@
   }
   * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
   body {
-    font-family: -apple-system, "PingFang TC", "Noto Sans TC", sans-serif;
-    color: var(--text-primary);
-    background: var(--bg-deep);
-    padding: 20px 16px 120px;
-    min-height: 100vh;
-  }
-  body::before {
-    content: "";
-    position: fixed;
-    inset: 0;
-    background: 
-      radial-gradient(circle at 15% 15%, rgba(153, 69, 255, 0.15), transparent 40%),
-      radial-gradient(circle at 85% 85%, rgba(255, 79, 216, 0.1), transparent 40%),
-      #050016;
-    z-index: -1;
-  }
+  font-family: -apple-system, "PingFang TC", "Noto Sans TC", sans-serif;
+  color: var(--text-primary);
+  background:
+    linear-gradient(
+      180deg,
+      #020305 0%,
+      #05080a 18%,
+      #07110f 38%,
+      #10231f 58%,
+      #dfe5df 100%
+    );
+  padding: 20px 16px 120px;
+  min-height: 100vh;
+  background-attachment: fixed;
+}
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(circle at 70% 18%, rgba(30, 255, 195, 0.16), transparent 28%),
+    radial-gradient(circle at 18% 35%, rgba(0, 120, 255, 0.12), transparent 34%),
+    radial-gradient(circle at 78% 72%, rgba(255, 255, 255, 0.55), transparent 34%),
+    linear-gradient(
+      180deg,
+      rgba(0,0,0,0.92) 0%,
+      rgba(2,10,9,0.82) 36%,
+      rgba(15,38,33,0.62) 62%,
+      rgba(235,240,235,0.92) 100%
+    );
+  pointer-events: none;
+  z-index: -2;
+}
 
-  body::after {
+body::after {
   content: "";
   position: fixed;
   inset: 0;
   background-image:
-    linear-gradient(rgba(255,255,255,0.035) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255,255,255,0.035) 1px, transparent 1px);
-  background-size: 42px 42px;
-  mask-image: radial-gradient(circle at center, black, transparent 78%);
-  -webkit-mask-image: radial-gradient(circle at center, black, transparent 78%);
+    linear-gradient(rgba(255,255,255,0.028) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.028) 1px, transparent 1px);
+  background-size: 44px 44px;
+  mask-image: linear-gradient(
+    180deg,
+    black 0%,
+    black 52%,
+    rgba(0,0,0,0.35) 78%,
+    transparent 100%
+  );
+  -webkit-mask-image: linear-gradient(
+    180deg,
+    black 0%,
+    black 52%,
+    rgba(0,0,0,0.35) 78%,
+    transparent 100%
+  );
   pointer-events: none;
   z-index: -1;
 }
