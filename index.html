@@ -217,72 +217,90 @@
     position: relative;
     overflow: hidden;
   }
+/* Obsidian Ring Card：黑曜石紋理 + 底層彩虹光 */
 .card {
   position: relative;
-  overflow: visible;
+  overflow: hidden;
   isolation: isolate;
+  border-radius: 28px;
+  background:
+    radial-gradient(circle at 28% 8%, rgba(255,255,255,0.16), transparent 24%),
+    linear-gradient(145deg, rgba(255,255,255,0.10), rgba(255,255,255,0.035) 38%, rgba(0,0,0,0.38)),
+    rgba(10, 8, 22, 0.84);
+  border: 1px solid rgba(255,255,255,0.18);
+  box-shadow:
+    0 22px 70px rgba(0,0,0,0.68),
+    inset 0 1px 0 rgba(255,255,255,0.22),
+    inset 0 -18px 45px rgba(0,0,0,0.42),
+    0 0 42px rgba(var(--glow-rgb), 0.20);
 }
 
+/* 卡片底部彩虹發光層 */
+.card::before {
+  content: "";
+  position: absolute;
+  left: -18%;
+  right: -18%;
+  bottom: -18%;
+  height: 70%;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 18% 55%, rgba(0,229,255,0.95), transparent 24%),
+    radial-gradient(circle at 42% 40%, rgba(255,210,111,0.92), transparent 22%),
+    radial-gradient(circle at 66% 52%, rgba(255,79,216,0.88), transparent 25%),
+    radial-gradient(circle at 84% 45%, rgba(0,94,255,0.86), transparent 24%),
+    linear-gradient(90deg, rgba(0,229,255,0.65), rgba(255,210,111,0.65), rgba(255,79,216,0.65));
+  filter: blur(22px) saturate(1.65);
+  opacity: 0.86;
+  z-index: 0;
+  pointer-events: none;
+  animation: bottomRainbowFlow 5.2s ease-in-out infinite alternate;
+}
+
+/* 黑色磨砂顆粒紋理 + 上方暗面 */
+.card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background:
+    radial-gradient(circle at 30% 0%, rgba(255,255,255,0.16), transparent 24%),
+    linear-gradient(180deg, rgba(255,255,255,0.09), transparent 32%, rgba(0,0,0,0.34) 100%),
+    repeating-radial-gradient(
+      circle at 20% 30%,
+      rgba(255,255,255,0.055) 0 1px,
+      transparent 1px 4px
+    );
+  mix-blend-mode: screen;
+  opacity: 0.42;
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* 確保卡片內容在紋理與彩虹光上層 */
 .card > * {
   position: relative;
   z-index: 2;
 }
 
-.card::before {
-  content: "";
-  position: absolute;
-  inset: -3px;
-  border-radius: inherit;
-background:
-  radial-gradient(circle at 20% 0%, rgba(255,255,255,0.55), transparent 32%),
-  linear-gradient(
-    135deg,
-    rgba(var(--glow-rgb), 1),
-    rgba(255,255,255,0.28),
-    rgba(var(--glow-rgb), 0.45)
-  );
-  opacity: 0.45;
-  filter: blur(14px);
-  z-index: -1;
-  animation: edgeBreath 3.6s ease-in-out infinite;
-  pointer-events: none;
-}
-
-@keyframes edgeBreath {
-  0%, 100% {
-    opacity: 0.08;
-    filter: blur(8px) saturate(0.8);
-    transform: scale(0.965);
+@keyframes bottomRainbowFlow {
+  0% {
+    transform: translate3d(-5%, 4%, 0) scale(0.96);
+    filter: blur(18px) saturate(1.25);
+    opacity: 0.52;
   }
 
-  45%, 55% {
-    opacity: 0.95;
-    filter: blur(30px) saturate(1.55);
-    transform: scale(1.035);
+  45% {
+    transform: translate3d(6%, -2%, 0) scale(1.04);
+    filter: blur(25px) saturate(1.85);
+    opacity: 0.92;
   }
-}
-  .card::after {
-  content: "";
-  position: absolute;
-  top: -45%;
-  left: -90%;
-  width: 58%;
-  height: 190%;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(255,255,255,0.16),
-    transparent
-  );
-  transform: rotate(18deg);
-  animation: cardShine 5.5s infinite;
-  pointer-events: none;
-}
 
-@keyframes cardShine {
-  0% { left: -90%; }
-  42% { left: 135%; }
-  100% { left: 135%; }
+  100% {
+    transform: translate3d(-2%, -5%, 0) scale(1.10);
+    filter: blur(30px) saturate(2.05);
+    opacity: 0.78;
+  }
 }
   .c-0056 { --accent: var(--accent-pink); --glow-rgb: 255, 79, 216; }
   .c-00878 { --accent: var(--accent-cyan); --glow-rgb: 0, 229, 255; }
