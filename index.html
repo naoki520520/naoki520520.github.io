@@ -80,22 +80,48 @@ body::after {
 
   .wrap { max-width: 500px; margin: 0 auto; }
   header { text-align: center; margin-bottom: 24px; }
-  header h1 {
+header h1 {
   font-size: 30px;
   font-weight: 950;
   letter-spacing: 1px;
-  background: linear-gradient(90deg, #fff, #ff4fd8, #00e5ff, #ffd26f, #fff);
-  background-size: 300% 100%;
+  background: linear-gradient(
+    90deg,
+    #f4fff9,
+    #7dffd2,
+    #1e8f72,
+    #0f3d34,
+    #b8ffe8,
+    #f4fff9
+  );
+  background-size: 320% 100%;
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
-  animation: titleFlow 4s linear infinite;
-  filter: drop-shadow(0 0 14px rgba(255,79,216,0.8));
+  animation: titleMossBreath 4.6s ease-in-out infinite;
+  filter:
+    drop-shadow(0 0 10px rgba(50, 255, 190, 0.55))
+    drop-shadow(0 0 22px rgba(18, 90, 72, 0.45));
 }
 
-@keyframes titleFlow {
-  0% { background-position: 0% 50%; }
-  100% { background-position: 300% 50%; }
+@keyframes titleMossBreath {
+  0%, 100% {
+    background-position: 0% 50%;
+    filter:
+      drop-shadow(0 0 6px rgba(70, 255, 190, 0.35))
+      drop-shadow(0 0 14px rgba(12, 65, 52, 0.35));
+    opacity: 0.86;
+    transform: scale(0.995);
+  }
+
+  45%, 55% {
+    background-position: 100% 50%;
+    filter:
+      drop-shadow(0 0 14px rgba(120, 255, 215, 0.85))
+      drop-shadow(0 0 34px rgba(20, 120, 92, 0.78))
+      drop-shadow(0 0 52px rgba(220, 255, 235, 0.30));
+    opacity: 1;
+    transform: scale(1.018);
+  }
 }
   header .sub { font-size: 11px; color: var(--text-muted); letter-spacing: 1.5px; }
 
