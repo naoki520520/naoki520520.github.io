@@ -184,11 +184,13 @@ overflow: hidden;
   position: absolute;
   inset: -3px;
   border-radius: inherit;
-  background: linear-gradient(
+background:
+  radial-gradient(circle at 20% 0%, rgba(255,255,255,0.55), transparent 32%),
+  linear-gradient(
     135deg,
-    rgba(var(--glow-rgb), 0.75),
-    rgba(255,255,255,0.18),
-    rgba(var(--glow-rgb), 0.25)
+    rgba(var(--glow-rgb), 1),
+    rgba(255,255,255,0.28),
+    rgba(var(--glow-rgb), 0.45)
   );
   opacity: 0.45;
   filter: blur(14px);
@@ -199,15 +201,15 @@ overflow: hidden;
 
 @keyframes edgeBreath {
   0%, 100% {
-    opacity: 0.22;
-    filter: blur(12px);
-    transform: scale(0.985);
+    opacity: 0.08;
+    filter: blur(8px) saturate(0.8);
+    transform: scale(0.965);
   }
 
-  50% {
-    opacity: 0.62;
-    filter: blur(22px);
-    transform: scale(1.015);
+  45%, 55% {
+    opacity: 0.95;
+    filter: blur(30px) saturate(1.55);
+    transform: scale(1.035);
   }
 }
   .card::after {
@@ -358,7 +360,7 @@ overflow: hidden;
     transform: scale(0);
   }
   70% {
-    opacity: 0.45;
+    opacity: 0.08;
   }
   100% {
     opacity: 0;
