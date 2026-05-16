@@ -168,7 +168,48 @@ overflow: hidden;
     position: relative;
     overflow: hidden;
   }
-  .card::before { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: var(--accent); }
+.card {
+  position: relative;
+  overflow: visible;
+  isolation: isolate;
+}
+
+.card > * {
+  position: relative;
+  z-index: 2;
+}
+
+.card::before {
+  content: "";
+  position: absolute;
+  inset: -3px;
+  border-radius: inherit;
+  background: linear-gradient(
+    135deg,
+    rgba(var(--glow-rgb), 0.75),
+    rgba(255,255,255,0.18),
+    rgba(var(--glow-rgb), 0.25)
+  );
+  opacity: 0.45;
+  filter: blur(14px);
+  z-index: -1;
+  animation: edgeBreath 3.6s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes edgeBreath {
+  0%, 100% {
+    opacity: 0.22;
+    filter: blur(12px);
+    transform: scale(0.985);
+  }
+
+  50% {
+    opacity: 0.62;
+    filter: blur(22px);
+    transform: scale(1.015);
+  }
+}
   .card::after {
   content: "";
   position: absolute;
