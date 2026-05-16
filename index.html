@@ -588,6 +588,19 @@ background:
   from { transform: translateX(0); }
   to { transform: translateX(-50%); }
 }
+
+.dashboard::before {
+  z-index: 0 !important;
+}
+
+.dashboard::after {
+  display: none !important;
+}
+
+.dashboard > * {
+  position: relative;
+  z-index: 2;
+}  
   
 </style>
 </head>
