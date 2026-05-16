@@ -268,6 +268,10 @@ body::after {
     ),
     rgba(10, 8, 22, 0.88);
 
+    background-size: 135% 135%, 145% 145%, 140% 140%, 100% 100%, 100% 100%, 100% 100%;
+  background-position: 0% 92%, 50% 100%, 100% 88%, 28% 8%, center, center;
+  animation: cardAuroraBreath 3.2s ease-in-out infinite alternate;
+
   border: 1px solid rgba(255,255,255,0.18);
   backdrop-filter: blur(15px);
   -webkit-backdrop-filter: blur(15px);
@@ -277,6 +281,57 @@ body::after {
     inset 0 1px 0 rgba(255,255,255,0.22),
     inset 0 -18px 45px rgba(0,0,0,0.42),
     0 0 42px rgba(var(--glow-rgb), 0.20);
+}
+
+  @keyframes cardAuroraBreath {
+  0% {
+    background-position:
+      -8% 96%,
+      48% 104%,
+      110% 92%,
+      28% 8%,
+      center,
+      center;
+    filter: brightness(0.92) saturate(1.05);
+    box-shadow:
+      0 18px 56px rgba(0,0,0,0.68),
+      inset 0 1px 0 rgba(255,255,255,0.16),
+      inset 0 -18px 45px rgba(0,0,0,0.45),
+      0 0 18px rgba(var(--glow-rgb), 0.10);
+  }
+
+  50% {
+    background-position:
+      10% 82%,
+      55% 88%,
+      88% 80%,
+      28% 8%,
+      center,
+      center;
+    filter: brightness(1.22) saturate(1.95);
+    box-shadow:
+      0 26px 78px rgba(0,0,0,0.72),
+      inset 0 1px 0 rgba(255,255,255,0.28),
+      inset 0 -18px 52px rgba(0,0,0,0.34),
+      0 0 42px rgba(var(--glow-rgb), 0.34),
+      0 0 88px rgba(var(--glow-rgb), 0.14);
+  }
+
+  100% {
+    background-position:
+      2% 86%,
+      62% 98%,
+      96% 84%,
+      28% 8%,
+      center,
+      center;
+    filter: brightness(1.02) saturate(1.35);
+    box-shadow:
+      0 22px 70px rgba(0,0,0,0.68),
+      inset 0 1px 0 rgba(255,255,255,0.22),
+      inset 0 -18px 45px rgba(0,0,0,0.42),
+      0 0 34px rgba(var(--glow-rgb), 0.24);
+  }
 }
 
 /* 卡片底部彩虹發光層 */
