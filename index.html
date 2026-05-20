@@ -899,6 +899,178 @@ header h1 {
     inset 0 1px 0 rgba(255, 255, 255, 0.28),
     inset 0 -12px 32px rgba(0, 0, 0, 0.38);
 }
+
+/* Bottom Cost Profit Panel：底部成本損益卡片 */
+.cost-panel {
+  margin-top: 28px;
+  padding: 20px;
+  border-radius: 28px;
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  background:
+    radial-gradient(circle at 18% 10%, rgba(120,255,215,0.18), transparent 28%),
+    radial-gradient(circle at 88% 88%, rgba(255,210,111,0.16), transparent 34%),
+    rgba(8, 14, 14, 0.72);
+  border: 1px solid rgba(230,255,245,0.22);
+  backdrop-filter: blur(22px) saturate(1.2);
+  -webkit-backdrop-filter: blur(22px) saturate(1.2);
+  box-shadow:
+    0 18px 55px rgba(0,0,0,0.44),
+    0 36px 90px rgba(0,0,0,0.30),
+    inset 0 1px 0 rgba(255,255,255,0.32),
+    inset 0 -18px 42px rgba(0,0,0,0.34),
+    0 0 32px rgba(90,255,210,0.12);
+}
+
+.cost-panel::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(135deg, rgba(255,255,255,0.12), transparent 34%),
+    repeating-linear-gradient(
+      135deg,
+      rgba(255,255,255,0.035) 0 1px,
+      transparent 1px 7px
+    );
+  opacity: 0.45;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.cost-panel > * {
+  position: relative;
+  z-index: 2;
+}
+
+.cost-panel-title {
+  font-size: 16px;
+  font-weight: 900;
+  margin-bottom: 14px;
+  letter-spacing: 0.5px;
+  color: #f4fff9;
+  text-shadow: 0 0 14px rgba(120,255,215,0.45);
+}
+
+.cost-row {
+  padding: 14px 0;
+  border-top: 1px solid rgba(255,255,255,0.10);
+}
+
+.cost-row:first-of-type {
+  border-top: none;
+}
+
+.cost-row-head {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  align-items: end;
+  margin-bottom: 10px;
+}
+
+.cost-name {
+  font-size: 18px;
+  font-weight: 900;
+}
+
+.cost-name span {
+  display: block;
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+.cost-price {
+  text-align: right;
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.cost-price b {
+  display: block;
+  color: var(--accent-gold);
+  font-size: 18px;
+  text-shadow: 0 0 12px rgba(255,210,111,0.65);
+}
+
+.cost-input-line {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.cost-input-box {
+  background: rgba(0,0,0,0.34);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 16px;
+  padding: 10px 12px;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.13),
+    inset 0 -1px 0 rgba(0,0,0,0.35);
+}
+
+.cost-input-box label {
+  display: block;
+  font-size: 9px;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+
+.cost-input-box input {
+  width: 100%;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: #fff;
+  font-size: 18px;
+  font-weight: 900;
+  text-align: right;
+  font-family: inherit;
+}
+
+.cost-result-line {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.cost-result {
+  background: rgba(255,255,255,0.045);
+  border: 1px solid rgba(255,255,255,0.10);
+  border-radius: 16px;
+  padding: 10px 12px;
+}
+
+.cost-result .l {
+  font-size: 9px;
+  color: var(--text-muted);
+  margin-bottom: 5px;
+}
+
+.cost-result .v {
+  font-size: 16px;
+  font-weight: 900;
+  text-align: right;
+}
+
+/* 台股習慣：正損益紅色，負損益綠色 */
+.pnl-positive {
+  color: #ff4f6d !important;
+  text-shadow: 0 0 14px rgba(255,79,109,0.65);
+}
+
+.pnl-negative {
+  color: #42ff9e !important;
+  text-shadow: 0 0 14px rgba(66,255,158,0.55);
+}
+
+.pnl-neutral {
+  color: var(--text-muted) !important;
+}
   
 </style>
 </head>
@@ -949,6 +1121,11 @@ header h1 {
 
   <div id="cards"></div>
 
+  <div class="cost-panel">
+  <div class="cost-panel-title">🧊 成本均價與預估損益</div>
+  <div id="costPanelRows"></div>
+</div>
+
   <footer>
     資料校正：0056 回測 26Q1 為 1.00，其餘 0.87<br>
     ⚡ 螢光強化版 · 配息回測資料每日更新
@@ -973,11 +1150,31 @@ const ETFS = [
 ];
 
 const STORAGE_KEY = "etf_neon_holdings_v4";
+const AVG_COST_KEY = "etf_neon_avg_cost_v1";
+
 let holdings = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
-
+let avgCosts = JSON.parse(localStorage.getItem(AVG_COST_KEY) || "{}");
+  
 function fmt(n) { return Math.round(n).toLocaleString(); }
-function getYearlySum(etf) { return etf.history.reduce((a, b) => a + b.v, 0); }
 
+function fmtPnl(n) {
+  const sign = n > 0 ? "+" : n < 0 ? "-" : "";
+  return `${sign}NT$ ${fmt(Math.abs(n))}`;
+}
+
+function fmtRate(n) {
+  const sign = n > 0 ? "+" : n < 0 ? "" : "";
+  return `${sign}${n.toFixed(2)}%`;
+}
+
+function pnlClass(n) {
+  if (n > 0) return "pnl-positive";
+  if (n < 0) return "pnl-negative";
+  return "pnl-neutral";
+}
+
+function getYearlySum(etf) { return etf.history.reduce((a, b) => a + b.v, 0); }
+  
 function updateCalculations() {
   let totalV = 0, totalS = 0, totalD = 0, totalYD = 0;
   ETFS.forEach(etf => {
@@ -999,6 +1196,70 @@ function updateCalculations() {
   document.getElementById("totalShares").textContent = totalS.toLocaleString();
   document.getElementById("totalDividend").textContent = `NT$ ${fmt(totalD)}`;
   document.getElementById("totalYearDividend").textContent = `NT$ ${fmt(totalYD)}`;
+updateCostPanel();
+}
+
+function renderCostPanel() {
+  const panel = document.getElementById("costPanelRows");
+  if (!panel) return;
+
+  panel.innerHTML = ETFS.map(etf => {
+    const avg = avgCosts[etf.id] || "";
+    return `
+      <div class="cost-row c-${etf.id}">
+        <div class="cost-row-head">
+          <div class="cost-name">
+            ${etf.id}
+            <span>${etf.name}</span>
+          </div>
+          <div class="cost-price">
+            目前市價
+            <b>$<span class="cost-current-price" data-id="${etf.id}">${etf.price.toFixed(2)}</span></b>
+          </div>
+        </div>
+
+        <div class="cost-input-line">
+          <div class="cost-input-box">
+            <label>成本均價</label>
+            <input
+              type="number"
+              step="0.01"
+              inputmode="decimal"
+              value="${avg}"
+              placeholder="0"
+              oninput="updateAvgCost('${etf.id}', this.value)"
+            >
+          </div>
+
+          <div class="cost-input-box">
+            <label>持有張數</label>
+            <input
+              type="number"
+              step="0.01"
+              inputmode="decimal"
+              value="${holdings[etf.id] || ""}"
+              placeholder="0"
+              oninput="updateHold('${etf.id}', this.value)"
+            >
+          </div>
+        </div>
+
+        <div class="cost-result-line">
+          <div class="cost-result">
+            <div class="l">預估損益金額</div>
+            <div class="v pnl-amount pnl-neutral" data-id="${etf.id}">未輸入</div>
+          </div>
+
+          <div class="cost-result">
+            <div class="l">報酬率</div>
+            <div class="v pnl-rate pnl-neutral" data-id="${etf.id}">未輸入</div>
+          </div>
+        </div>
+      </div>
+    `;
+  }).join("");
+
+  updateCostPanel();
 }
 
 function initialRender() {
@@ -1042,7 +1303,43 @@ window.updateHold = (id, val) => {
   holdings[id] = parseFloat(val) || 0;
   localStorage.setItem(STORAGE_KEY, JSON.stringify(holdings));
   updateCalculations();
+  updateCostPanel();
 };
+
+window.updateAvgCost = (id, val) => {
+  avgCosts[id] = parseFloat(val) || 0;
+  localStorage.setItem(AVG_COST_KEY, JSON.stringify(avgCosts));
+  updateCostPanel();
+};
+
+function updateCostPanel() {
+  ETFS.forEach(etf => {
+    const shares = holdings[etf.id] || 0;
+    const avg = avgCosts[etf.id] || 0;
+    const stocks = shares * 1000;
+
+    const marketValue = stocks * etf.price;
+    const cost = stocks * avg;
+    const pnl = avg > 0 && stocks > 0 ? marketValue - cost : 0;
+    const rate = cost > 0 ? (pnl / cost) * 100 : 0;
+
+    const priceEl = document.querySelector(`.cost-current-price[data-id="${etf.id}"]`);
+    const pnlEl = document.querySelector(`.pnl-amount[data-id="${etf.id}"]`);
+    const rateEl = document.querySelector(`.pnl-rate[data-id="${etf.id}"]`);
+
+    if (priceEl) priceEl.textContent = etf.price.toFixed(2);
+
+    if (pnlEl) {
+      pnlEl.textContent = avg > 0 && stocks > 0 ? fmtPnl(pnl) : "未輸入";
+      pnlEl.className = `v pnl-amount ${avg > 0 && stocks > 0 ? pnlClass(pnl) : "pnl-neutral"}`;
+    }
+
+    if (rateEl) {
+      rateEl.textContent = avg > 0 && stocks > 0 ? fmtRate(rate) : "未輸入";
+      rateEl.className = `v pnl-rate ${avg > 0 && stocks > 0 ? pnlClass(pnl) : "pnl-neutral"}`;
+    }
+  });
+}
 
 async function fetchDividends() {
   try {
@@ -1094,6 +1391,7 @@ async function handleRefresh() {
     toast("✅ 即時市價已同步更新");
     document.getElementById('lastUpdate').textContent = `最後更新：${new Date().toLocaleTimeString()}`;
     updateCalculations();
+    updateCostPanel();
   }
   btn.classList.remove('loading');
 }
