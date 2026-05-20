@@ -679,7 +679,8 @@ header h1 {
 }
 
  @supports (animation-timeline: view()) {
-  .card {
+  .card,
+.cost-panel {
     animation: cardScrollReveal both ease-out;
     animation-timeline: view();
     animation-range: entry 5% cover 35%;
@@ -689,7 +690,7 @@ header h1 {
     from {
       opacity: 0.25;
       transform: translateY(28px) scale(0.94);
-      filter: blur(8px) saturate(0.7);
+      filter: blur(15px) saturate(0.45) brightness(0.72);
     }
     to {
       opacity: 1;
