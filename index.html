@@ -1477,6 +1477,7 @@ document.getElementById('refreshBtn').onclick = handleRefresh;
 async function boot() {
   await fetchDividends();
   initialRender();
+  renderCostPanel();
   setTimeout(handleRefresh, 1000);
 }
 
