@@ -1362,6 +1362,83 @@ header h1 {
     inset 0 1px 0 rgba(255,255,255,0.20),
     inset 0 -1px 0 rgba(0,0,0,0.38);
 }
+
+/* Cost Total Summary：成本卡片總覽區 */
+.cost-total-summary {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin: 4px 0 18px;
+  padding: 14px;
+  border-radius: 24px;
+  background:
+    radial-gradient(circle at 16% 18%, rgba(120,255,215,0.22), transparent 34%),
+    radial-gradient(circle at 92% 82%, rgba(255,79,109,0.20), transparent 34%),
+    linear-gradient(145deg, rgba(255,255,255,0.10), rgba(255,255,255,0.025)),
+    rgba(0,0,0,0.26);
+  border: 1px solid rgba(230,255,245,0.18);
+  box-shadow:
+    0 14px 34px rgba(0,0,0,0.30),
+    inset 0 1px 0 rgba(255,255,255,0.22),
+    inset 0 -1px 0 rgba(0,0,0,0.35),
+    0 0 28px rgba(120,255,215,0.10);
+  overflow: hidden;
+}
+
+.cost-total-summary::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(135deg, rgba(255,255,255,0.14), transparent 34%),
+    repeating-linear-gradient(
+      135deg,
+      rgba(255,255,255,0.035) 0 1px,
+      transparent 1px 8px
+    );
+  opacity: 0.55;
+  pointer-events: none;
+}
+
+.cost-total-box {
+  position: relative;
+  z-index: 2;
+  padding: 12px;
+  border-radius: 18px;
+  background:
+    linear-gradient(145deg, rgba(255,255,255,0.08), rgba(255,255,255,0.025)),
+    rgba(0,0,0,0.24);
+  border: 1px solid rgba(255,255,255,0.12);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.18),
+    inset 0 -1px 0 rgba(0,0,0,0.34),
+    0 8px 18px rgba(0,0,0,0.20);
+}
+
+.cost-total-box .l {
+  font-size: 10px;
+  font-weight: 850;
+  color: rgba(235,255,248,0.68);
+  margin-bottom: 7px;
+}
+
+.cost-total-box .v {
+  font-size: 20px;
+  font-weight: 950;
+  text-align: right;
+  color: #fff;
+  text-shadow:
+    0 0 10px rgba(255,255,255,0.36),
+    0 0 22px rgba(120,255,215,0.20);
+}
+
+.cost-total-box .r {
+  margin-top: 4px;
+  font-size: 12px;
+  font-weight: 900;
+  text-align: right;
+}
   
 </style>
 </head>
@@ -1405,8 +1482,22 @@ header h1 {
 
   <div id="cards"></div>
 
-  <div class="cost-panel">
+<div class="cost-panel">
   <div class="cost-panel-title">🧊 成本均價與預估損益</div>
+
+  <div class="cost-total-summary">
+    <div class="cost-total-box">
+      <div class="l">總成本</div>
+      <div class="v" id="totalCostAmount">未輸入</div>
+    </div>
+
+    <div class="cost-total-box">
+      <div class="l">總損益</div>
+      <div class="v pnl-neutral" id="totalPnlAmount">未輸入</div>
+      <div class="r pnl-neutral" id="totalPnlRate">--</div>
+    </div>
+  </div>
+
   <div id="costPanelRows"></div>
 </div>
 
@@ -1459,28 +1550,65 @@ function pnlClass(n) {
 
 function getYearlySum(etf) { return etf.history.reduce((a, b) => a + b.v, 0); }
   
-function updateCalculations() {
-  let totalV = 0, totalS = 0, totalD = 0, totalYD = 0;
+function updateCostPanel() {
+  let totalCost = 0;
+  let totalMarketValue = 0;
+
   ETFS.forEach(etf => {
-    const s = holdings[etf.id] || 0;
-    const stocks = s * 1000;
-    const mktV = stocks * etf.price;
-    const curD = stocks * etf.div;
-    const yearD = stocks * getYearlySum(etf);
-    totalV += mktV; totalS += s; totalD += curD; totalYD += yearD;
-    const card = document.querySelector(`.c-${etf.id}`);
-    if (card) {
-      card.querySelector('.price-val').textContent = etf.price.toFixed(2);
-      card.querySelector('.mkt-val').textContent = `NT$ ${fmt(mktV)}`;
-      card.querySelector('.cur-div-val').textContent = `NT$ ${fmt(curD)}`;
-      card.querySelector('.year-div-val').textContent = `年估收入 NT$ ${fmt(yearD)}`;
+    const shares = holdings[etf.id] || 0;
+    const avg = avgCosts[etf.id] || 0;
+    const stocks = shares * 1000;
+
+    const marketValue = stocks * etf.price;
+    const cost = stocks * avg;
+    const hasData = avg > 0 && stocks > 0;
+
+    const pnl = hasData ? marketValue - cost : 0;
+    const rate = cost > 0 ? (pnl / cost) * 100 : 0;
+
+    if (hasData) {
+      totalCost += cost;
+      totalMarketValue += marketValue;
+    }
+
+    const priceEl = document.querySelector(`.cost-current-price[data-id="${etf.id}"]`);
+    const pnlEl = document.querySelector(`.pnl-amount[data-id="${etf.id}"]`);
+    const rateEl = document.querySelector(`.pnl-rate[data-id="${etf.id}"]`);
+
+    if (priceEl) priceEl.textContent = etf.price.toFixed(2);
+
+    if (pnlEl) {
+      pnlEl.textContent = hasData ? fmtPnl(pnl) : "未輸入";
+      pnlEl.className = `v pnl-amount ${hasData ? pnlClass(pnl) : "pnl-neutral"}`;
+    }
+
+    if (rateEl) {
+      rateEl.textContent = hasData ? fmtRate(rate) : "未輸入";
+      rateEl.className = `v pnl-rate ${hasData ? pnlClass(pnl) : "pnl-neutral"}`;
     }
   });
-  document.getElementById("totalValue").textContent = `NT$ ${fmt(totalV)}`;
-  document.getElementById("totalShares").textContent = totalS.toLocaleString();
-  document.getElementById("totalDividend").textContent = `NT$ ${fmt(totalD)}`;
-  document.getElementById("totalYearDividend").textContent = `NT$ ${fmt(totalYD)}`;
-updateCostPanel();
+
+  const totalPnl = totalMarketValue - totalCost;
+  const totalRate = totalCost > 0 ? (totalPnl / totalCost) * 100 : 0;
+  const hasTotal = totalCost > 0;
+
+  const totalCostEl = document.getElementById("totalCostAmount");
+  const totalPnlEl = document.getElementById("totalPnlAmount");
+  const totalRateEl = document.getElementById("totalPnlRate");
+
+  if (totalCostEl) {
+    totalCostEl.textContent = hasTotal ? `NT$ ${fmt(totalCost)}` : "未輸入";
+  }
+
+  if (totalPnlEl) {
+    totalPnlEl.textContent = hasTotal ? fmtPnl(totalPnl) : "未輸入";
+    totalPnlEl.className = `v ${hasTotal ? pnlClass(totalPnl) : "pnl-neutral"}`;
+  }
+
+  if (totalRateEl) {
+    totalRateEl.textContent = hasTotal ? fmtRate(totalRate) : "--";
+    totalRateEl.className = `r ${hasTotal ? pnlClass(totalPnl) : "pnl-neutral"}`;
+  }
 }
 
 function renderCostPanel() {
