@@ -1529,34 +1529,89 @@ const AVG_COST_KEY = "etf_neon_avg_cost_v1";
 
 let holdings = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
 let avgCosts = JSON.parse(localStorage.getItem(AVG_COST_KEY) || "{}");
-  
-function fmt(n) { return Math.round(n).toLocaleString(); }
+
+function fmt(n) {
+  return Math.round(Number(n) || 0).toLocaleString();
+}
 
 function fmtPnl(n) {
-  const sign = n > 0 ? "+" : n < 0 ? "-" : "";
-  return `${sign}NT$ ${fmt(Math.abs(n))}`;
+  const value = Number(n) || 0;
+  const sign = value > 0 ? "+" : value < 0 ? "-" : "";
+  return `${sign}NT$ ${fmt(Math.abs(value))}`;
 }
 
 function fmtRate(n) {
-  const sign = n > 0 ? "+" : n < 0 ? "" : "";
-  return `${sign}${n.toFixed(2)}%`;
+  const value = Number(n) || 0;
+  const sign = value > 0 ? "+" : "";
+  return `${sign}${value.toFixed(2)}%`;
 }
 
 function pnlClass(n) {
-  if (n > 0) return "pnl-positive";
-  if (n < 0) return "pnl-negative";
+  const value = Number(n) || 0;
+  if (value > 0) return "pnl-positive";
+  if (value < 0) return "pnl-negative";
   return "pnl-neutral";
 }
 
-function getYearlySum(etf) { return etf.history.reduce((a, b) => a + b.v, 0); }
-  
+function getYearlySum(etf) {
+  return etf.history.reduce((a, b) => a + (Number(b.v) || 0), 0);
+}
+
+function updateCalculations() {
+  let totalValue = 0;
+  let totalShares = 0;
+  let totalDividend = 0;
+  let totalYearDividend = 0;
+
+  const cards = document.querySelectorAll(".card");
+
+  ETFS.forEach((etf, index) => {
+    const shares = Number(holdings[etf.id]) || 0;
+    const stocks = shares * 1000;
+
+    const marketValue = stocks * etf.price;
+    const currentDividend = stocks * etf.div;
+    const yearlyDividend = stocks * getYearlySum(etf);
+
+    totalValue += marketValue;
+    totalShares += shares;
+    totalDividend += currentDividend;
+    totalYearDividend += yearlyDividend;
+
+    const card = cards[index];
+    if (!card) return;
+
+    const priceVal = card.querySelector(".price-val");
+    const mktVal = card.querySelector(".mkt-val");
+    const curDivVal = card.querySelector(".cur-div-val");
+    const yearDivVal = card.querySelector(".year-div-val");
+
+    if (priceVal) priceVal.textContent = etf.price.toFixed(2);
+    if (mktVal) mktVal.textContent = `NT$ ${fmt(marketValue)}`;
+    if (curDivVal) curDivVal.textContent = `NT$ ${fmt(currentDividend)}`;
+    if (yearDivVal) yearDivVal.textContent = `年估收入 NT$ ${fmt(yearlyDividend)}`;
+  });
+
+  const totalValueEl = document.getElementById("totalValue");
+  const totalSharesEl = document.getElementById("totalShares");
+  const totalDividendEl = document.getElementById("totalDividend");
+  const totalYearDividendEl = document.getElementById("totalYearDividend");
+
+  if (totalValueEl) totalValueEl.textContent = `NT$ ${fmt(totalValue)}`;
+  if (totalSharesEl) totalSharesEl.textContent = fmt(totalShares);
+  if (totalDividendEl) totalDividendEl.textContent = `NT$ ${fmt(totalDividend)}`;
+  if (totalYearDividendEl) totalYearDividendEl.textContent = `NT$ ${fmt(totalYearDividend)}`;
+
+  updateCostPanel();
+}
+
 function updateCostPanel() {
   let totalCost = 0;
   let totalMarketValue = 0;
 
   ETFS.forEach(etf => {
-    const shares = holdings[etf.id] || 0;
-    const avg = avgCosts[etf.id] || 0;
+    const shares = Number(holdings[etf.id]) || 0;
+    const avg = Number(avgCosts[etf.id]) || 0;
     const stocks = shares * 1000;
 
     const marketValue = stocks * etf.price;
@@ -1575,7 +1630,9 @@ function updateCostPanel() {
     const pnlEl = document.querySelector(`.pnl-amount[data-id="${etf.id}"]`);
     const rateEl = document.querySelector(`.pnl-rate[data-id="${etf.id}"]`);
 
-    if (priceEl) priceEl.textContent = etf.price.toFixed(2);
+    if (priceEl) {
+      priceEl.textContent = etf.price.toFixed(2);
+    }
 
     if (pnlEl) {
       pnlEl.textContent = hasData ? fmtPnl(pnl) : "未輸入";
@@ -1676,38 +1733,52 @@ function renderCostPanel() {
 
 function initialRender() {
   const container = document.getElementById("cards");
+  if (!container) return;
+
   container.innerHTML = "";
+
   ETFS.forEach(etf => {
     const s = holdings[etf.id] || 0;
     const yearlySum = getYearlySum(etf);
     const div = document.createElement("div");
+
     div.className = `card c-${etf.id}`;
     div.innerHTML = `
       <div class="card-header">
         <div class="card-title">${etf.id} <span style="font-size:12px; color:var(--text-muted); font-weight:400">${etf.name}</span></div>
         <div class="price-tag" onclick="manual('${etf.id}')">市價 <b>$<span class="price-val">${etf.price.toFixed(2)}</span></b></div>
       </div>
+
       <div class="input-row">
         <label>持有張數</label>
         <input type="number" step="0.01" inputmode="decimal" value="${s || ""}" placeholder="0" oninput="updateHold('${etf.id}', this.value)">
         <span style="font-size:12px; margin-left:8px">張</span>
       </div>
+
       <div class="history">
         <div class="hist-title">最近四次配息回測 (合計 $${yearlySum.toFixed(3)})</div>
-        <div class="hist-flex">${etf.history.map(h => `<div class="hist-item"><span class="q">${h.q}</span><span class="v">$${h.v.toFixed(2)}</span></div>`).join('')}</div>
+        <div class="hist-flex">
+          ${etf.history.map(h => `<div class="hist-item"><span class="q">${h.q}</span><span class="v">$${Number(h.v).toFixed(2)}</span></div>`).join("")}
+        </div>
       </div>
+
       <div class="card-stats">
-  <div class="stat-item" style="grid-column: span 2;"><div class="l">💎 持股市值</div><div class="v mkt-val">NT$ 0</div></div>
-</div>
+        <div class="stat-item" style="grid-column: span 2;">
+          <div class="l">💎 持股市值</div>
+          <div class="v mkt-val">NT$ 0</div>
+        </div>
+      </div>
+
       <div class="card-estimate">
         <div class="est-label">本次預估可領</div>
         <div class="est-val cur-div-val">NT$ 0</div>
         <div class="est-year year-div-val">年估收入 NT$ 0</div>
       </div>
-    
     `;
+
     container.appendChild(div);
   });
+
   updateCalculations();
 }
 
@@ -1715,7 +1786,6 @@ window.updateHold = (id, val) => {
   holdings[id] = parseFloat(val) || 0;
   localStorage.setItem(STORAGE_KEY, JSON.stringify(holdings));
   updateCalculations();
-  updateCostPanel();
 };
 
 window.updateAvgCost = (id, val) => {
@@ -1723,35 +1793,6 @@ window.updateAvgCost = (id, val) => {
   localStorage.setItem(AVG_COST_KEY, JSON.stringify(avgCosts));
   updateCostPanel();
 };
-
-function updateCostPanel() {
-  ETFS.forEach(etf => {
-    const shares = holdings[etf.id] || 0;
-    const avg = avgCosts[etf.id] || 0;
-    const stocks = shares * 1000;
-
-    const marketValue = stocks * etf.price;
-    const cost = stocks * avg;
-    const pnl = avg > 0 && stocks > 0 ? marketValue - cost : 0;
-    const rate = cost > 0 ? (pnl / cost) * 100 : 0;
-
-    const priceEl = document.querySelector(`.cost-current-price[data-id="${etf.id}"]`);
-    const pnlEl = document.querySelector(`.pnl-amount[data-id="${etf.id}"]`);
-    const rateEl = document.querySelector(`.pnl-rate[data-id="${etf.id}"]`);
-
-    if (priceEl) priceEl.textContent = etf.price.toFixed(2);
-
-    if (pnlEl) {
-      pnlEl.textContent = avg > 0 && stocks > 0 ? fmtPnl(pnl) : "未輸入";
-      pnlEl.className = `v pnl-amount ${avg > 0 && stocks > 0 ? pnlClass(pnl) : "pnl-neutral"}`;
-    }
-
-    if (rateEl) {
-      rateEl.textContent = avg > 0 && stocks > 0 ? fmtRate(rate) : "未輸入";
-      rateEl.className = `v pnl-rate ${avg > 0 && stocks > 0 ? pnlClass(pnl) : "pnl-neutral"}`;
-    }
-  });
-}
 
 async function fetchDividends() {
   try {
@@ -1794,19 +1835,6 @@ async function fetchDividends() {
     return false;
   }
 }
-  
-async function handleRefresh() {
-  const btn = document.getElementById('refreshBtn');
-  btn.classList.add('loading');
-  const status = await fetchPrices();
-  if (status) {
-    toast("✅ 即時市價已同步更新");
-    document.getElementById('lastUpdate').textContent = `最後更新：${new Date().toLocaleTimeString()}`;
-    updateCalculations();
-    updateCostPanel();
-  }
-  btn.classList.remove('loading');
-}
 
 async function fetchPrices() {
   try {
@@ -1828,7 +1856,10 @@ async function fetchPrices() {
     });
 
     if (data.updatedAt) {
-      document.getElementById('lastUpdate').textContent = `最後更新：${new Date(data.updatedAt).toLocaleString()}`;
+      const lastUpdateEl = document.getElementById("lastUpdate");
+      if (lastUpdateEl) {
+        lastUpdateEl.textContent = `最後更新：${new Date(data.updatedAt).toLocaleString()}`;
+      }
     }
 
     return true;
@@ -1839,9 +1870,42 @@ async function fetchPrices() {
   }
 }
 
+async function handleRefresh() {
+  const btn = document.getElementById("refreshBtn");
+
+  if (btn) {
+    btn.classList.add("loading");
+  }
+
+  const status = await fetchPrices();
+
+  if (status) {
+    toast("✅ 即時市價已同步更新");
+
+    const lastUpdateEl = document.getElementById("lastUpdate");
+    if (lastUpdateEl) {
+      lastUpdateEl.textContent = `最後更新：${new Date().toLocaleTimeString()}`;
+    }
+
+    updateCalculations();
+    updateCostPanel();
+  }
+
+  if (btn) {
+    btn.classList.remove("loading");
+  }
+}
+
 function toast(msg) {
-  const t = document.getElementById('toast'); t.textContent = msg; t.style.display = 'block';
-  setTimeout(() => t.style.display = 'none', 2500);
+  const t = document.getElementById("toast");
+  if (!t) return;
+
+  t.textContent = msg;
+  t.style.display = "block";
+
+  setTimeout(() => {
+    t.style.display = "none";
+  }, 2500);
 }
 
 function triggerEnergyFlash() {
@@ -1877,14 +1941,22 @@ function createTouchRipple(e) {
 document.addEventListener("pointerdown", createTouchRipple, { passive: true });
 
 window.manual = (id) => {
-  const etf = ETFS.find(x=>x.id===id);
+  const etf = ETFS.find(x => x.id === id);
+  if (!etf) return;
+
   const p = prompt(`修正 ${id} 的最新市價：`, etf.price);
-  if(p && !isNaN(p)) { etf.price = parseFloat(p); updateCalculations(); }
+
+  if (p && !isNaN(p)) {
+    etf.price = parseFloat(p);
+    updateCalculations();
+    updateCostPanel();
+  }
 };
 
-
-
-document.getElementById('refreshBtn').onclick = handleRefresh;
+const refreshBtn = document.getElementById("refreshBtn");
+if (refreshBtn) {
+  refreshBtn.onclick = handleRefresh;
+}
 
 async function boot() {
   await fetchDividends();
@@ -1894,7 +1966,7 @@ async function boot() {
 }
 
 boot();
-  
+
 </script>
 </body>
 </html>
