@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-06-11T19:52:55+08:00",
+  "updatedAt": "2026-06-12T19:11:49+08:00",
   "timezone": "Asia/Taipei",
   "symbols": {
     "0056": {
@@ -36,8 +36,15 @@
     },
     "00878": {
       "name": "國泰永續高股息",
-      "currentDividend": 0.42,
+      "currentDividend": 0.66,
       "history": [
+        {
+          "q": "26Q2",
+          "v": 0.66,
+          "exDate": "2026-05-19",
+          "payDate": "2026-06-12",
+          "source": "Cathay official API"
+        },
         {
           "q": "26Q1",
           "v": 0.42,
@@ -57,13 +64,6 @@
           "v": 0.4,
           "exDate": "2025-08-18",
           "payDate": "2025-09-11",
-          "source": "Cathay official API"
-        },
-        {
-          "q": "25Q2",
-          "v": 0.47,
-          "exDate": "2025-05-19",
-          "payDate": "2025-06-13",
           "source": "Cathay official API"
         }
       ],
