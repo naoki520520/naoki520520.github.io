@@ -1,24 +1,24 @@
 {
-  "updatedAt": "2026-09-22T18:15:43+08:00",
+  "updatedAt": "2026-09-23T13:18:14+08:00",
   "timezone": "Asia/Taipei",
   "symbols": {
     "0056": {
       "price": 56.85,
       "name": "元大高股息",
       "source": "TWSE MIS",
-      "tradeTime": "20260922 13:30:00"
+      "tradeTime": "20260923 13:17:59"
     },
     "00878": {
       "price": 35.21,
       "name": "國泰永續高股息",
       "source": "TWSE MIS",
-      "tradeTime": "20260922 13:30:00"
+      "tradeTime": "20260923 13:17:59"
     },
     "00919": {
       "price": 32.16,
       "name": "群益台灣精選高息",
       "source": "TWSE MIS",
-      "tradeTime": "20260922 13:30:00"
+      "tradeTime": "20260923 13:17:59"
     }
   }
 }
