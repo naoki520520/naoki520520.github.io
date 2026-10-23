@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-10-22T21:03:37+08:00",
+  "updatedAt": "2026-10-23T20:42:39+08:00",
   "timezone": "Asia/Taipei",
   "symbols": {
     "0056": {
@@ -67,7 +67,7 @@
           "source": "Cathay official API"
         }
       ],
-      "source": "Cathay official API",
+      "source": "fallback old dividends.json after official fetch failed: HTTPError",
       "policy": "latest four paid records by payDate"
     },
     "00919": {
